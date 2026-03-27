@@ -5,27 +5,33 @@ set -e
 
 echo "=== Diner Inventory System Setup ==="
 
-# 1. Check for Java 21
+# 1. Update package list if we're on Ubuntu/Debian
+if command -v apt-get >/dev/null 2>&1; then
+    echo "Updating package lists..."
+    sudo apt-get update -y
+fi
+
+# 2. Check and Install Java 21
 if ! command -v java >/dev/null 2>&1; then
-    echo "Error: Java is not installed."
-    exit 1
+    echo "Java not found. Installing OpenJDK 21..."
+    sudo apt-get install -y openjdk-21-jdk
+else
+    JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
+    if [ "$JAVA_VERSION" -lt 21 ]; then
+        echo "Updating Java to version 21..."
+        sudo apt-get install -y openjdk-21-jdk
+    fi
 fi
+echo "✓ Java 21+ ready."
 
-JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-if [ "$JAVA_VERSION" -lt 21 ]; then
-    echo "Error: Java version 21 or higher is required. Current: $JAVA_VERSION"
-    exit 1
-fi
-echo "✓ Java 21+ found."
-
-# 2. Check for Maven
+# 3. Check and Install Maven
 if ! command -v mvn >/dev/null 2>&1; then
-    echo "Error: Maven is not installed."
-    exit 1
+    echo "Maven not found. Installing Maven..."
+    sudo apt-get install -y maven
 fi
-echo "✓ Maven found."
+echo "✓ Maven ready."
 
-# 3. Build the project
+# 4. Build the project
 echo "Building project (this may take a minute)..."
 mvn clean install -DskipTests
 
