@@ -18,10 +18,17 @@ public class InventoryService {
     }
 
     @Transactional
-    public void addStock(Long itemId, Double amount) {
+    public void addStock(Long itemId, Double amount, Double pricePerUnit) {
         InventoryItem item = inventoryItemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
+        
         item.setStockLevel(item.getStockLevel() + amount);
+        
+        if (pricePerUnit != null && !pricePerUnit.equals(item.getCurrentPrice())) {
+            item.setPreviousPrice(item.getCurrentPrice());
+            item.setCurrentPrice(pricePerUnit);
+        }
+        
         inventoryItemRepository.save(item);
     }
 

@@ -26,6 +26,8 @@
                         <th class="px-6 py-3 font-semibold text-gray-700">Item Name</th>
                         <th class="px-6 py-3 font-semibold text-gray-700">Stock Level</th>
                         <th class="px-6 py-3 font-semibold text-gray-700">Unit</th>
+                        <th class="px-6 py-3 font-semibold text-gray-700">Current Price</th>
+                        <th class="px-6 py-3 font-semibold text-gray-700">Previous Price</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y">
@@ -33,6 +35,8 @@
                         <td class="px-6 py-4" th:text="${item.name}">Burger Patty</td>
                         <td class="px-6 py-4" th:classappend="${item.stockLevel < 10 ? 'text-red-600 font-bold' : ''}" th:text="${item.stockLevel}">50</td>
                         <td class="px-6 py-4 text-sm text-gray-500" th:text="${item.unitType}">UNIT</td>
+                        <td class="px-6 py-4" th:text="${'$' + #numbers.formatDecimal(item.currentPrice, 1, 2)}">$0.00</td>
+                        <td class="px-6 py-4 text-gray-400" th:text="${'$' + #numbers.formatDecimal(item.previousPrice, 1, 2)}">$0.00</td>
                     </tr>
                 </tbody>
             </table>

@@ -18,6 +18,10 @@ public class InventoryItem {
 
     private Double stockLevel = 0.0;
 
+    private Double currentPrice = 0.0;
+
+    private Double previousPrice = 0.0;
+
     @Enumerated(EnumType.STRING)
     private UnitType unitType;
 }

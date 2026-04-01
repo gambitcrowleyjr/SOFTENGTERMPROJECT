@@ -21,8 +21,12 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Initial Stock</label>
-                <input type="number" step="0.01" th:field="*{stockLevel}" value="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
+                <label class="block text-sm font-medium text-gray-700">Initial Stock (Units or Pounds)</label>
+                <input type="number" step="0.01" th:field="*{stockLevel}" value="0" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Total Price of Order</label>
+                <input type="number" step="0.01" name="totalPrice" value="0" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
             </div>
             <div class="flex space-x-4">
                 <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 shadow transition">Add Item</button>
