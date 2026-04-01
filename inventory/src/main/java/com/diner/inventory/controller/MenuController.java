@@ -66,6 +66,46 @@ public class MenuController {
         return "menu/waitstaff-orders";
     }
 
+    @GetMapping("/modify")
+    public String showModifySelection(Model model) {
+        model.addAttribute("menuItems", menuService.getAllMenuItems());
+        return "menu/modify-select";
+    }
+
+    @GetMapping("/modify/{id}")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        MenuItem menuItem = menuService.getMenuItemById(id);
+        if (menuItem == null) {
+            return "redirect:/menu/modify";
+        }
+        model.addAttribute("menuItem", menuItem);
+        model.addAttribute("allInventoryItems", inventoryService.getAllInventory());
+        return "menu/modify";
+    }
+
+    @PostMapping("/modify/{id}")
+    public String updateMenuItem(@PathVariable Long id,
+                                 @ModelAttribute MenuItem menuItem,
+                                 @RequestParam(required = false) List<Long> inventoryItemIds,
+                                 @RequestParam(required = false) List<Double> quantities) {
+        List<MenuItemIngredient> ingredients = new ArrayList<>();
+        if (inventoryItemIds != null && quantities != null) {
+            for (int i = 0; i < inventoryItemIds.size(); i++) {
+                Long invId = inventoryItemIds.get(i);
+                Double qty = quantities.get(i);
+                if (invId != null && qty != null) {
+                    MenuItemIngredient ingredient = new MenuItemIngredient();
+                    InventoryItem invItem = inventoryItemRepository.findById(invId).orElse(null);
+                    ingredient.setInventoryItem(invItem);
+                    ingredient.setQuantityRequired(qty);
+                    ingredients.add(ingredient);
+                }
+            }
+        }
+        menuService.updateMenuItem(id, menuItem, ingredients);
+        return "redirect:/menu";
+    }
+
     @PostMapping("/order")
     public String processOrder(@RequestParam Long menuItemId, Model model, RedirectAttributes redirectAttributes) {
         try {

@@ -21,6 +21,10 @@ public class MenuService {
         return menuItemRepository.findAll();
     }
 
+    public MenuItem getMenuItemById(Long id) {
+        return menuItemRepository.findById(id).orElse(null);
+    }
+
     @Transactional
     public void createMenuItem(MenuItem menuItem) {
         // Associate ingredients with the menu item
@@ -30,6 +34,26 @@ public class MenuService {
             }
         }
         menuItemRepository.save(menuItem);
+    }
+
+    @Transactional
+    public void updateMenuItem(Long id, MenuItem updatedMenuItem, List<MenuItemIngredient> newIngredients) {
+        MenuItem existingMenuItem = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+        
+        existingMenuItem.setName(updatedMenuItem.getName());
+        existingMenuItem.setPrice(updatedMenuItem.getPrice());
+        
+        // Clear existing ingredients and add new ones
+        existingMenuItem.getIngredients().clear();
+        if (newIngredients != null) {
+            for (MenuItemIngredient ingredient : newIngredients) {
+                ingredient.setMenuItem(existingMenuItem);
+                existingMenuItem.getIngredients().add(ingredient);
+            }
+        }
+        
+        menuItemRepository.save(existingMenuItem);
     }
 
     @Transactional
