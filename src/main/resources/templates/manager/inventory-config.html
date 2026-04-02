@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Alert Configuration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">⚙️ Inventory Alert Config</h1>
+            <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 border-b">
+                    <tr>
+                        <th class="px-6 py-3 font-semibold text-gray-700">Item Name</th>
+                        <th class="px-6 py-3 font-semibold text-gray-700">Unit Cost</th>
+                        <th class="px-6 py-3 font-semibold text-gray-700">Settings</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    <tr th:each="item : ${items}">
+                        <td class="px-6 py-4 font-medium" th:text="${item.name}">Burger Patty</td>
+                        <td class="px-6 py-4" th:text="${'$' + #numbers.formatDecimal(item.currentPrice, 1, 2)}">$1.50</td>
+                        <td class="px-6 py-4">
+                            <form th:action="@{/manager/inventory-config}" method="post" class="flex flex-wrap items-center gap-4">
+                                <input type="hidden" name="itemId" th:value="${item.id}">
+                                
+                                <!-- High Value Toggle -->
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-sm text-gray-600 font-semibold">High Value:</label>
+                                    <input type="checkbox" name="highValue" th:checked="${item.highValue}" 
+                                           class="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 toggle-threshold">
+                                </div>
+
+                                <!-- Stock Threshold -->
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-sm text-gray-600 font-semibold">Min Stock:</label>
+                                    <input type="number" name="alertThreshold" step="0.1" th:value="${item.alertThreshold}"
+                                           class="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 threshold-input"
+                                           th:disabled="${!item.highValue}">
+                                </div>
+
+                                <!-- Price Jump Threshold -->
+                                <div class="flex items-center space-x-2 border-l pl-4">
+                                    <label class="text-sm text-gray-600 font-semibold">Price Jump Alert:</label>
+                                    <div class="relative">
+                                        <input type="number" name="priceThreshold" step="0.1" th:value="${item.priceAlertThreshold}"
+                                               class="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                               placeholder="0">
+                                        <span class="ml-1 text-gray-500">%</span>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="bg-indigo-600 text-white px-4 py-1 rounded text-sm font-bold hover:bg-indigo-700 transition">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="mt-4 text-sm text-gray-500 italic">* Price Jump Alert: Set to 0 to disable. Triggers when new stock unit price increases by more than this percentage.</p>
+    </div>
+
+    <script>
+        document.querySelectorAll('.toggle-threshold').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const thresholdInput = this.closest('form').querySelector('.threshold-input');
+                thresholdInput.disabled = !this.checked;
+                if (!this.checked) {
+                    thresholdInput.value = 0;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
