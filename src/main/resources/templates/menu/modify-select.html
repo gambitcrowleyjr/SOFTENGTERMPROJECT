@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modify Menu Item</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg text-center">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800">✏️ Modify Menu Item</h1>
+        <p class="text-gray-600 mb-8">Select an existing menu item to modify its details and ingredients.</p>
+        
+        <div class="mb-8">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Select Menu Item</label>
+            <select id="menuItemSelect" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white border p-3 text-lg">
+                <option value="" disabled selected>-- Pick a Menu Item --</option>
+                <option th:each="item : ${menuItems}" th:value="${item.id}" th:text="${item.name + ' ($' + item.price + ')'}"></option>
+            </select>
+        </div>
+
+        <div class="flex space-x-4">
+            <button onclick="redirectToModify()" class="w-full bg-indigo-600 text-white px-4 py-3 rounded-md hover:bg-indigo-700 shadow transition font-bold">Modify Selected Item</button>
+            <a href="/" class="w-full text-center bg-gray-200 text-gray-800 px-4 py-3 rounded-md hover:bg-gray-300 shadow transition font-bold">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function redirectToModify() {
+            const select = document.getElementById('menuItemSelect');
+            const itemId = select.value;
+            if (itemId) {
+                window.location.href = '/menu/modify/' + itemId;
+            } else {
+                alert('Please select a menu item first.');
+            }
+        }
+    </script>
+</body>
+</html>
