@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Diner Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-indigo-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold">Diner System</a>
+                    <div class="hidden md:block ml-10 flex items-baseline space-x-4">
+                        <a href="/inventory" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500">Inventory</a>
+                        <a href="/inventory/unload-orders" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500">Unload Orders</a>
+                        <a href="/menu" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500">Menu</a>
+                        <a href="/menu/create" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500">Create Menu Items</a>
+                        <a href="/menu/waitstaff-orders" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 font-bold">Orders</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div th:replace="${content}"></div>
+    </main>
+</body>
+</html>
