@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory Alerts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">🚨 Inventory Alerts</h1>
+            <div class="flex items-center space-x-6">
+                <form th:if="${!alerts.empty}" th:action="@{/manager/alerts/clear}" method="post" onsubmit="return confirm('Are you sure you want to clear all alerts?')">
+                    <button type="submit" class="bg-red-100 text-red-600 px-4 py-2 rounded font-bold hover:bg-red-200 transition">Clear All</button>
+                </form>
+                <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div th:if="${alerts.empty}" class="bg-white p-12 rounded-lg shadow-md text-center">
+            <p class="text-gray-500 text-xl italic">No current inventory alerts. Everything is in stock!</p>
+        </div>
+
+        <div th:if="${!alerts.empty}" class="space-y-4">
+            <div th:each="alert : ${alerts}" 
+                 class="bg-white p-6 rounded-lg shadow-md border-l-4"
+                 th:classappend="${alert.read ? 'border-gray-300 opacity-60' : 'border-red-500'}">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span th:if="${!alert.read}" class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded uppercase">New</span>
+                            <h3 class="font-bold text-lg" th:text="${alert.inventoryItem.name}">Item Name</h3>
+                        </div>
+                        <p class="text-gray-700" th:text="${alert.message}">Low stock alert message.</p>
+                        <p class="text-xs text-gray-400 mt-2" th:text="${#temporals.format(alert.createdAt, 'MMM dd, yyyy HH:mm:ss')}">Timestamp</p>
+                    </div>
+                    <form th:if="${!alert.read}" th:action="@{'/manager/alerts/read/' + ${alert.id}}" method="post">
+                        <button type="submit" class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold">Mark as Read</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
