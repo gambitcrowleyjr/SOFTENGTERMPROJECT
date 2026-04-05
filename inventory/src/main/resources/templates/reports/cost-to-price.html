@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cost to Price Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Cost to Price Report</h1>
+            <div class="space-x-4">
+                <a href="/reports" class="text-indigo-600 hover:underline">Back to Reports</a>
+                <a href="/" class="text-indigo-600 hover:underline">Dashboard</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-sm text-gray-500">Total Menu Cost</p>
+                <p class="text-2xl font-bold text-red-600" th:text="'$' + ${totalMenuCost}">$0.00</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-sm text-gray-500">Total Menu Price</p>
+                <p class="text-2xl font-bold text-blue-600" th:text="'$' + ${totalMenuPrice}">$0.00</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow">
+                <p class="text-sm text-gray-500">Total Estimated Profit</p>
+                <p class="text-2xl font-bold text-green-600" th:text="'$' + ${totalProfit}">$0.00</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow overflow-hidden">
+            <table class="min-w-full">
+                <thead class="bg-indigo-600 text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left">Menu Item</th>
+                        <th class="px-6 py-4 text-left">Ingredient Cost</th>
+                        <th class="px-6 py-4 text-left">Menu Price</th>
+                        <th class="px-6 py-4 text-left">Profit</th>
+                        <th class="px-6 py-4 text-left">Margin %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${rows}" class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-semibold" th:text="${row.itemName}">Burger</td>
+                        <td class="px-6 py-4" th:text="'$' + ${row.cost}">$0.00</td>
+                        <td class="px-6 py-4" th:text="'$' + ${row.price}">$0.00</td>
+                        <td class="px-6 py-4" th:text="'$' + ${row.profit}">$0.00</td>
+                        <td class="px-6 py-4" th:text="${row.marginPercent} + '%'">0%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,154 @@
+package com.diner.inventory.controller;
+
+import com.diner.inventory.model.MenuItem;
+import com.diner.inventory.model.MenuItemIngredient;
+import com.diner.inventory.service.MenuService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+public class ReportController {
+
+    private final MenuService menuService;
+
+    public ReportController(MenuService menuService) {
+        this.menuService = menuService;
+    }
+
+    @GetMapping("/reports")
+    public String reportsHome() {
+        return "reports/index";
+    }
+
+    @GetMapping("/reports/cost-to-price")
+    public String costToPriceReport(Model model) {
+        List<MenuItem> menuItems = menuService.getAllMenuItems();
+        List<CostToPriceRow> reportRows = new ArrayList<>();
+
+        double totalMenuPrice = 0.0;
+        double totalMenuCost = 0.0;
+        double totalProfit = 0.0;
+
+        for (MenuItem menuItem : menuItems) {
+            double ingredientCost = 0.0;
+
+            if (menuItem.getIngredients() != null) {
+                for (MenuItemIngredient ingredient : menuItem.getIngredients()) {
+                    if (ingredient.getInventoryItem() != null
+                            && ingredient.getInventoryItem().getCurrentPrice() != null
+                            && ingredient.getQuantityRequired() != null) {
+
+                        ingredientCost += ingredient.getQuantityRequired()
+                                * ingredient.getInventoryItem().getCurrentPrice();
+                    }
+                }
+            }
+
+            double price = menuItem.getPrice() != null ? menuItem.getPrice() : 0.0;
+            double profit = price - ingredientCost;
+            double marginPercent = price > 0 ? (profit / price) * 100 : 0.0;
+
+            reportRows.add(new CostToPriceRow(
+                    menuItem.getName(),
+                    round(ingredientCost),
+                    round(price),
+                    round(profit),
+                    round(marginPercent)
+            ));
+
+            totalMenuPrice += price;
+            totalMenuCost += ingredientCost;
+            totalProfit += profit;
+        }
+
+        model.addAttribute("rows", reportRows);
+        model.addAttribute("totalMenuPrice", round(totalMenuPrice));
+        model.addAttribute("totalMenuCost", round(totalMenuCost));
+        model.addAttribute("totalProfit", round(totalProfit));
+
+        return "reports/cost-to-price";
+    }
+
+    @GetMapping("/reports/daily")
+    public String dailyReport(Model model) {
+        List<MenuItem> menuItems = menuService.getAllMenuItems();
+
+        int menuItemCount = menuItems.size();
+        int totalIngredientLinks = 0;
+        double totalPotentialRevenue = 0.0;
+        double totalPotentialCost = 0.0;
+
+        for (MenuItem menuItem : menuItems) {
+            totalPotentialRevenue += menuItem.getPrice() != null ? menuItem.getPrice() : 0.0;
+
+            if (menuItem.getIngredients() != null) {
+                for (MenuItemIngredient ingredient : menuItem.getIngredients()) {
+                    totalIngredientLinks++;
+
+                    if (ingredient.getInventoryItem() != null
+                            && ingredient.getInventoryItem().getCurrentPrice() != null
+                            && ingredient.getQuantityRequired() != null) {
+
+                        totalPotentialCost += ingredient.getQuantityRequired()
+                                * ingredient.getInventoryItem().getCurrentPrice();
+                    }
+                }
+            }
+        }
+
+        model.addAttribute("reportDate", LocalDate.now());
+        model.addAttribute("menuItemCount", menuItemCount);
+        model.addAttribute("totalIngredientLinks", totalIngredientLinks);
+        model.addAttribute("totalPotentialRevenue", round(totalPotentialRevenue));
+        model.addAttribute("totalPotentialCost", round(totalPotentialCost));
+        model.addAttribute("estimatedProfit", round(totalPotentialRevenue - totalPotentialCost));
+        model.addAttribute("menuItems", menuItems);
+
+        return "reports/daily";
+    }
+
+    private double round(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
+
+    public static class CostToPriceRow {
+        private final String itemName;
+        private final double cost;
+        private final double price;
+        private final double profit;
+        private final double marginPercent;
+
+        public CostToPriceRow(String itemName, double cost, double price, double profit, double marginPercent) {
+            this.itemName = itemName;
+            this.cost = cost;
+            this.price = price;
+            this.profit = profit;
+            this.marginPercent = marginPercent;
+        }
+
+        public String getItemName() {
+            return itemName;
+        }
+
+        public double getCost() {
+            return cost;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public double getProfit() {
+            return profit;
+        }
+
+        public double getMarginPercent() {
+            return marginPercent;
+        }
+    }
+}
