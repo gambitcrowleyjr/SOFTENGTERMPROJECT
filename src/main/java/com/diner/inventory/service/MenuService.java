@@ -58,14 +58,11 @@ public class MenuService {
     }
 
     @Transactional
-    public void processOrder(Long menuItemId) {
-        MenuItem menuItem = menuItemRepository.findById(menuItemId)
-                .orElseThrow(() -> new RuntimeException("Menu item not found"));
-
+    public void deductStock(MenuItem menuItem, int quantity) {
         for (MenuItemIngredient ingredient : menuItem.getIngredients()) {
             InventoryItem inventoryItem = ingredient.getInventoryItem();
             Double currentStock = inventoryItem.getStockLevel();
-            Double requiredQuantity = ingredient.getQuantityRequired();
+            Double requiredQuantity = ingredient.getQuantityRequired() * quantity;
             
             if (currentStock < requiredQuantity) {
                 throw new RuntimeException("Insufficient stock for: " + inventoryItem.getName());
@@ -75,5 +72,12 @@ public class MenuService {
             inventoryItemRepository.save(inventoryItem);
             managerService.checkAndCreateAlert(inventoryItem);
         }
+    }
+
+    @Transactional
+    public void processOrder(Long menuItemId) {
+        MenuItem menuItem = menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+        deductStock(menuItem, 1);
     }
 }

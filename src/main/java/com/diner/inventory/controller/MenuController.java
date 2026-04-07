@@ -60,20 +60,4 @@ public class MenuController {
         return "redirect:/menu";
     }
 
-    @GetMapping("/waitstaff-orders")
-    public String showOrders(Model model) {
-        model.addAttribute("menuItems", menuService.getAllMenuItems());
-        return "menu/waitstaff-orders";
-    }
-
-    @PostMapping("/order")
-    public String processOrder(@RequestParam Long menuItemId, Model model, RedirectAttributes redirectAttributes) {
-        try {
-            menuService.processOrder(menuItemId);
-            redirectAttributes.addFlashAttribute("successMessage", "Order processed successfully!");
-        } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/menu/waitstaff-orders";
-    }
 }

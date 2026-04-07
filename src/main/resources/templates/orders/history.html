@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">📜 Order History</h1>
+            <div class="space-x-4">
+                <a href="/orders/open" class="text-indigo-600 hover:underline">Open Orders</a>
+                <a href="/" class="text-indigo-600 hover:underline">Dashboard</a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Date/Time</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Table</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Items</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr th:each="order : ${orders}" class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4">
+                            <p class="text-sm font-bold text-gray-800" th:text="${#temporals.format(order.completedAt, 'MMM dd, HH:mm')}">Apr 07, 14:20</p>
+                            <p class="text-[10px] text-gray-400" th:text="'Started: ' + ${#temporals.format(order.createdAt, 'HH:mm')}">Started: 13:45</p>
+                        </td>
+                        <td class="px-6 py-4 text-xl font-black text-indigo-600" th:text="${order.tableNumber}">5</td>
+                        <td class="px-6 py-4">
+                            <ul class="text-sm space-y-1">
+                                <li th:each="item : ${order.items}">
+                                    <span class="font-bold text-indigo-600" th:text="${item.quantity} + 'x'">1x</span>
+                                    <span th:text="${item.menuItem.name}">Burger</span>
+                                </li>
+                            </ul>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tighter bg-green-100 text-green-700">PAID</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div th:if="${#lists.isEmpty(orders)}" class="text-center py-20 bg-white">
+                <p class="text-gray-500 text-xl">No completed orders yet.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
