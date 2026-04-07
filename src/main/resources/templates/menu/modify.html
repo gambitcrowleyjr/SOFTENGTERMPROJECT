@@ -8,7 +8,7 @@
 <body class="bg-gray-100 p-8">
     <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg">
         <h1 class="text-2xl font-bold mb-6 text-gray-800">✏️ Modify Menu Item: <span th:text="${menuItem.name}"></span></h1>
-        <form th:action="@{/menu/modify/{id}(id=${menuItem.id})}" th:object="${menuItem}" method="POST" id="menuForm">
+        <form th:action="@{/manager/menu/modify/{id}(id=${menuItem.id})}" th:object="${menuItem}" method="POST" id="menuForm">
             <div class="grid grid-cols-2 gap-4 mb-8">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Menu Item Name</label>
@@ -45,7 +45,7 @@
 
             <div class="flex space-x-4">
                 <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 shadow transition font-bold">Save Changes</button>
-                <a th:href="@{/menu/modify}" class="w-full text-center bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 shadow transition font-bold">Cancel</a>
+                <a th:href="@{/manager/menu/modify}" class="w-full text-center bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 shadow transition font-bold">Cancel</a>
             </div>
         </form>
     </div>

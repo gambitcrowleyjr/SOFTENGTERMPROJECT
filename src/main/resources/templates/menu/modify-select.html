@@ -20,7 +20,7 @@
 
         <div class="flex space-x-4">
             <button onclick="redirectToModify()" class="w-full bg-indigo-600 text-white px-4 py-3 rounded-md hover:bg-indigo-700 shadow transition font-bold">Modify Selected Item</button>
-            <a href="/" class="w-full text-center bg-gray-200 text-gray-800 px-4 py-3 rounded-md hover:bg-gray-300 shadow transition font-bold">Back to Home</a>
+            <a href="/manager/dashboard" class="w-full text-center bg-gray-200 text-gray-800 px-4 py-3 rounded-md hover:bg-gray-300 shadow transition font-bold">Back to Dashboard</a>
         </div>
     </div>
 
@@ -29,7 +29,7 @@
             const select = document.getElementById('menuItemSelect');
             const itemId = select.value;
             if (itemId) {
-                window.location.href = '/menu/modify/' + itemId;
+                window.location.href = '/manager/menu/modify/' + itemId;
             } else {
                 alert('Please select a menu item first.');
             }
