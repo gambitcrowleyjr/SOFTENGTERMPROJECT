@@ -2,55 +2,162 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>New Order</title>
+    <title>POS Terminal - New Ticket</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">🛎️ New Ticket</h1>
-            <div class="space-x-4">
-                <a href="/orders/open" class="text-indigo-600 hover:underline">Open Orders</a>
-                <a href="/" class="text-indigo-600 hover:underline">Dashboard</a>
-            </div>
-        </div>
-
-        <form th:action="@{/orders/new}" method="POST" class="space-y-8">
-            <div class="bg-white p-6 rounded-2xl shadow-md border-2 border-indigo-100">
-                <label for="tableNumber" class="block text-sm font-medium text-gray-700 mb-1">Table Number</label>
-                <input type="text" name="tableNumber" id="tableNumber" required 
-                       class="w-full px-4 py-3 rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-xl font-bold"
-                       placeholder="Enter table number (e.g. 5, A1)...">
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div th:each="menuItem : ${menuItems}" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-transparent hover:border-indigo-500 transition-all flex flex-col justify-between">
-                    <div>
-                        <h2 class="text-xl font-black text-gray-900 mb-2" th:text="${menuItem.name}">Diner Burger</h2>
-                        <div class="text-sm text-gray-500 mb-4">
-                            <span th:text="'$' + ${menuItem.price}">$9.99</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <label th:for="'item_' + ${menuItem.id}" class="text-sm font-medium text-gray-700">Qty:</label>
-                        <input type="number" th:name="'item_' + ${menuItem.id}" th:id="'item_' + ${menuItem.id}" 
-                               value="0" min="0" 
-                               class="w-20 px-3 py-2 rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    </div>
+<body class="bg-gray-100 min-h-screen overflow-hidden">
+    <div class="flex h-screen">
+        
+        <!-- Left Side: Menu Items Grid -->
+        <div class="flex-grow p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-black text-gray-800">🛎️ POS Menu</h1>
+                <div class="space-x-4">
+                    <a href="/orders/open" class="text-indigo-600 font-bold hover:underline">Open Orders</a>
+                    <a href="/" class="text-indigo-600 font-bold hover:underline">Exit</a>
                 </div>
             </div>
 
+            <div th:if="${errorMessage}" class="mb-6 p-4 bg-red-100 text-red-800 border-l-4 border-red-500 rounded-r shadow-md font-bold">
+                <p th:text="${errorMessage}"></p>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div th:each="menuItem : ${menuItems}" 
+                     class="bg-white p-4 rounded-2xl shadow-md border-2 border-transparent hover:border-indigo-500 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between h-40 group active:scale-95"
+                     th:onclick="'addItem(' + ${menuItem.id} + ', \'' + ${menuItem.name} + '\', ' + ${menuItem.price} + ')'">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition" th:text="${menuItem.name}">Burger</h2>
+                        <p class="text-indigo-500 font-black" th:text="'$' + ${#numbers.formatDecimal(menuItem.price, 1, 2)}">$9.99</p>
+                    </div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Click to add +</div>
+                </div>
+            </div>
+            
             <div th:if="${#lists.isEmpty(menuItems)}" class="text-center py-20 bg-white rounded-3xl shadow-inner border-2 border-dashed border-gray-300">
                 <p class="text-gray-500 text-xl">No menu items created yet.</p>
                 <a href="/menu/create" class="mt-4 inline-block text-indigo-600 font-bold">Go create some &rarr;</a>
             </div>
+        </div>
 
-            <div class="sticky bottom-8">
-                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 shadow-2xl active:transform active:scale-95 transition text-xl">
-                    Create Ticket
-                </button>
+        <!-- Right Side: Current Ticket Sidebar -->
+        <div class="w-96 bg-white border-l-4 border-indigo-50 shadow-2xl flex flex-col">
+            <div class="p-6 bg-indigo-600 text-white">
+                <h2 class="text-xl font-black">CURRENT TICKET</h2>
             </div>
-        </form>
+            
+            <form th:action="@{/orders/new}" method="POST" id="ticketForm" class="flex flex-col flex-grow">
+                <!-- Table Number Input -->
+                <div class="p-4 border-b border-gray-100 bg-gray-50">
+                    <label for="tableNumber" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Table Number</label>
+                    <input type="text" name="tableNumber" id="tableNumber" required 
+                           class="w-full px-4 py-2 rounded-xl border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 text-xl font-black text-indigo-600"
+                           placeholder="Ex: 5 or A1">
+                </div>
+
+                <!-- Items List -->
+                <div class="flex-grow overflow-y-auto p-4 space-y-3" id="basketItems">
+                    <!-- JS will populate this -->
+                    <div id="emptyMessage" class="text-center py-20 text-gray-300 italic">
+                        No items selected.
+                    </div>
+                </div>
+
+                <!-- Hidden Inputs Container -->
+                <div id="hiddenInputs"></div>
+
+                <!-- Footer / Checkout -->
+                <div class="p-6 border-t-4 border-indigo-50 bg-gray-50 space-y-4">
+                    <div class="flex justify-between items-center text-xl font-black text-gray-800">
+                        <span>TOTAL</span>
+                        <span id="displayTotal">$0.00</span>
+                    </div>
+                    <button type="submit" id="submitBtn" disabled
+                            class="w-full bg-gray-300 text-white font-black py-4 rounded-2xl transition-all text-xl cursor-not-allowed">
+                        PLACE ORDER
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <script>
+        const basket = {};
+        const basketItemsDiv = document.getElementById('basketItems');
+        const hiddenInputsDiv = document.getElementById('hiddenInputs');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const displayTotal = document.getElementById('displayTotal');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function addItem(id, name, price) {
+            if (basket[id]) {
+                basket[id].qty += 1;
+            } else {
+                basket[id] = { name, price, qty: 1 };
+            }
+            updateUI();
+        }
+
+        function removeItem(id) {
+            if (basket[id].qty > 1) {
+                basket[id].qty -= 1;
+            } else {
+                delete basket[id];
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            basketItemsDiv.innerHTML = '';
+            hiddenInputsDiv.innerHTML = '';
+            let total = 0;
+            let itemCount = 0;
+
+            const items = Object.keys(basket);
+            
+            if (items.length === 0) {
+                basketItemsDiv.appendChild(emptyMessage);
+                submitBtn.disabled = true;
+                submitBtn.classList.replace('bg-indigo-600', 'bg-gray-300');
+                submitBtn.classList.add('cursor-not-allowed');
+            } else {
+                items.forEach(id => {
+                    const item = basket[id];
+                    total += item.price * item.qty;
+                    itemCount += item.qty;
+
+                    // Visible Item in List
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center bg-indigo-50 p-3 rounded-xl border border-indigo-100";
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-gray-800">${item.name}</p>
+                            <p class="text-xs text-indigo-500 font-bold">$${(item.price * item.qty).toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button type="button" onclick="removeItem(${id})" class="bg-white w-6 h-6 rounded-full shadow text-indigo-600 font-bold">-</button>
+                            <span class="font-black text-gray-800">${item.qty}</span>
+                            <button type="button" onclick="addItem(${id}, '${item.name}', ${item.price})" class="bg-indigo-600 w-6 h-6 rounded-full shadow text-white font-bold">+</button>
+                        </div>
+                    `;
+                    basketItemsDiv.appendChild(div);
+
+                    // Hidden Form Input
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `item_${id}`;
+                    input.value = item.qty;
+                    hiddenInputsDiv.appendChild(input);
+                });
+
+                submitBtn.disabled = false;
+                submitBtn.classList.replace('bg-gray-300', 'bg-indigo-600');
+                submitBtn.classList.remove('cursor-not-allowed');
+                submitBtn.classList.add('hover:bg-indigo-700', 'shadow-xl');
+            }
+
+            displayTotal.innerText = `$${total.toFixed(2)}`;
+        }
+    </script>
 </body>
 </html>

@@ -23,4 +23,7 @@ public class OrderItem {
     private MenuItem menuItem;
 
     private Integer quantity;
+
+    private Double priceAtOrder; // Selling price at time of order
+    private Double costAtOrder;  // Cost of ingredients at time of order
 }

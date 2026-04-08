@@ -35,8 +35,17 @@ public class OrderService {
                 orderItem.setOrder(order);
                 orderItem.setMenuItem(menuItem);
                 orderItem.setQuantity(entry.getValue());
+                
+                // Capture historical price and cost
+                orderItem.setPriceAtOrder(menuItem.getPrice());
+                orderItem.setCostAtOrder(menuService.calculateMenuItemCost(menuItem));
+                
                 order.getItems().add(orderItem);
             }
+        }
+
+        if (order.getItems().isEmpty()) {
+            throw new RuntimeException("Cannot create an empty ticket. Please select at least one item.");
         }
         
         return orderRepository.save(order);

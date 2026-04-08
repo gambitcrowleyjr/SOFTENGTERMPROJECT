@@ -5,6 +5,7 @@ import com.diner.inventory.model.MenuItemIngredient;
 import com.diner.inventory.service.InventoryService;
 import com.diner.inventory.service.ManagerService;
 import com.diner.inventory.service.MenuService;
+import com.diner.inventory.service.ReportService;
 import com.diner.inventory.repository.InventoryItemRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ManagerController {
     private final ManagerService managerService;
     private final InventoryService inventoryService;
     private final MenuService menuService;
+    private final ReportService reportService;
     private final InventoryItemRepository inventoryItemRepository;
 
     @GetMapping("/login")
@@ -85,6 +87,24 @@ public class ManagerController {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
         managerService.deleteAllAlerts();
         return "redirect:/manager/alerts";
+    }
+
+    @GetMapping("/reports")
+    public String showReports(@RequestParam(defaultValue = "daily") String range, HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        
+        java.time.LocalDate end = java.time.LocalDate.now();
+        java.time.LocalDate start;
+        
+        switch (range) {
+            case "weekly": start = end.minusWeeks(1); break;
+            case "monthly": start = end.minusMonths(1); break;
+            default: start = end; break;
+        }
+        
+        model.addAttribute("reports", reportService.getReportsByDateRange(start, end));
+        model.addAttribute("range", range);
+        return "manager/reports";
     }
 
     @GetMapping("/menu/modify")

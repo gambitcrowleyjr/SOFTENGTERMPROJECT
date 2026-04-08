@@ -80,4 +80,12 @@ public class MenuService {
                 .orElseThrow(() -> new RuntimeException("Menu item not found"));
         deductStock(menuItem, 1);
     }
+
+    public double calculateMenuItemCost(MenuItem menuItem) {
+        double cost = 0.0;
+        for (MenuItemIngredient ingredient : menuItem.getIngredients()) {
+            cost += ingredient.getInventoryItem().getCurrentPrice() * ingredient.getQuantityRequired();
+        }
+        return cost;
+    }
 }

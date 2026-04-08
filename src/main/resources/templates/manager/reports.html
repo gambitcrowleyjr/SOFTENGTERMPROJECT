@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Financial Reports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">📊 Financial Reports</h1>
+            <div class="space-x-4">
+                <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Range Selector -->
+        <div class="bg-white p-4 rounded-2xl shadow-md mb-8 flex space-x-4">
+            <a th:href="@{/manager/reports(range='daily')}" 
+               class="px-6 py-2 rounded-xl font-bold transition"
+               th:classappend="${range == 'daily' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">Daily</a>
+            <a th:href="@{/manager/reports(range='weekly')}" 
+               class="px-6 py-2 rounded-xl font-bold transition"
+               th:classappend="${range == 'weekly' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">Weekly</a>
+            <a th:href="@{/manager/reports(range='monthly')}" 
+               class="px-6 py-2 rounded-xl font-bold transition"
+               th:classappend="${range == 'monthly' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">Monthly</a>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Date</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Earnings</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Costs (COGS)</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Net Profit</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr th:each="report : ${reports}" class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 font-bold text-gray-800" th:text="${report.date}">2026-04-07</td>
+                        <td class="px-6 py-4 text-green-600 font-bold" th:text="'$' + ${#numbers.formatDecimal(report.totalEarnings, 1, 2)}">$0.00</td>
+                        <td class="px-6 py-4 text-red-500" th:text="'$' + ${#numbers.formatDecimal(report.totalCosts, 1, 2)}">$0.00</td>
+                        <td class="px-6 py-4 font-black" 
+                            th:classappend="${report.totalProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}"
+                            th:text="'$' + ${#numbers.formatDecimal(report.totalProfit, 1, 2)}">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div th:if="${#lists.isEmpty(reports)}" class="text-center py-20 bg-white">
+                <p class="text-gray-500 text-xl">No data found for this period.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
