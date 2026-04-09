@@ -23,9 +23,12 @@
             </div>
 
             <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <div th:each="menuItem : ${menuItems}" 
+                <div th:each="menuItem : ${menuItems}"
                      class="bg-white p-4 rounded-2xl shadow-md border-2 border-transparent hover:border-indigo-500 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between h-40 group active:scale-95"
-                     th:onclick="'addItem(' + ${menuItem.id} + ', \'' + ${menuItem.name} + '\', ' + ${menuItem.price} + ')'">
+                     th:data-id="${menuItem.id}"
+                     th:data-name="${menuItem.name}"
+                     th:data-price="${menuItem.price}"
+                     onclick="addItem(this.dataset.id, this.dataset.name, parseFloat(this.dataset.price))">
                     <div>
                         <h2 class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition" th:text="${menuItem.name}">Burger</h2>
                         <p class="text-indigo-500 font-black" th:text="'$' + ${#numbers.formatDecimal(menuItem.price, 1, 2)}">$9.99</p>
