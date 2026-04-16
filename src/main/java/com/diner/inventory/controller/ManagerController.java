@@ -27,6 +27,7 @@ public class ManagerController {
     private final MenuService menuService;
     private final ReportService reportService;
     private final InventoryItemRepository inventoryItemRepository;
+    private final com.diner.inventory.service.EmployeeService employeeService;
 
     @GetMapping("/login")
     public String showLoginForm() {
@@ -87,6 +88,55 @@ public class ManagerController {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
         managerService.deleteAllAlerts();
         return "redirect:/manager/alerts";
+    }
+
+    @GetMapping("/employees")
+    public String listEmployees(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        model.addAttribute("employees", employeeService.getAllEmployees());
+        model.addAttribute("sections", employeeService.getAllSections());
+        return "manager/employees";
+    }
+
+    @PostMapping("/employees/add")
+    public String addEmployee(@RequestParam String employeeId, @RequestParam String name, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        com.diner.inventory.model.Employee employee = new com.diner.inventory.model.Employee();
+        employee.setEmployeeId(employeeId);
+        employee.setName(name);
+        employeeService.saveEmployee(employee);
+        return "redirect:/manager/employees";
+    }
+
+    @GetMapping("/sections")
+    public String listSections(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        model.addAttribute("sections", employeeService.getAllSections());
+        model.addAttribute("tables", employeeService.getAllTables());
+        return "manager/sections";
+    }
+
+    @PostMapping("/sections/add")
+    public String addSection(@RequestParam String name, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        com.diner.inventory.model.Section section = new com.diner.inventory.model.Section();
+        section.setName(name);
+        employeeService.saveSection(section);
+        return "redirect:/manager/sections";
+    }
+
+    @PostMapping("/sections/assign-table")
+    public String assignTable(@RequestParam Long tableId, @RequestParam Long sectionId, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        employeeService.assignTableToSection(tableId, sectionId);
+        return "redirect:/manager/sections";
+    }
+
+    @PostMapping("/employees/assign-section")
+    public String assignSection(@RequestParam Long employeeId, @RequestParam Long sectionId, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        employeeService.assignSectionToEmployee(employeeId, sectionId);
+        return "redirect:/manager/employees";
     }
 
     @GetMapping("/reports")

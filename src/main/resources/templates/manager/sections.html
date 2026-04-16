@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Section Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">📍 Section Management</h1>
+            <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Add Section Form -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4">Create New Section</h2>
+                <form th:action="@{/manager/sections/add}" method="post">
+                    <div class="flex flex-col gap-4">
+                        <input type="text" name="name" placeholder="Section Name (e.g., Patio, Bar)" required class="border p-2 rounded">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Create Section</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Assign Table to Section -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4">Assign Table to Section</h2>
+                <form th:action="@{/manager/sections/assign-table}" method="post">
+                    <div class="flex flex-col gap-4">
+                        <select name="tableId" required class="border p-2 rounded">
+                            <option value="" disabled selected>Select Table</option>
+                            <option th:each="table : ${tables}" th:value="${table.id}" th:text="'Table ' + ${table.tableNumber} + (${table.section != null ? ' (Current: ' + table.section.name + ')' : ''})"></option>
+                        </select>
+                        <select name="sectionId" required class="border p-2 rounded">
+                            <option value="" disabled selected>Select Section</option>
+                            <option th:each="sec : ${sections}" th:value="${sec.id}" th:text="${sec.name}"></option>
+                        </select>
+                        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition">Assign Table</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Section Summary -->
+        <div class="mt-8 bg-white rounded-lg shadow-md overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 border-b">
+                    <tr>
+                        <th class="p-4 font-bold text-gray-700">Section Name</th>
+                        <th class="p-4 font-bold text-gray-700">Tables</th>
+                        <th class="p-4 font-bold text-gray-700">Assigned Employee</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="sec : ${sections}" class="border-b hover:bg-gray-50 transition">
+                        <td class="p-4 font-medium" th:text="${sec.name}"></td>
+                        <td class="p-4">
+                            <span th:each="table, iterStat : ${sec.tables}" 
+                                  th:text="${table.tableNumber} + ${!iterStat.last ? ', ' : ''}"
+                                  class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1"></span>
+                            <span th:if="${#lists.isEmpty(sec.tables)}" class="text-gray-400 italic text-sm">No tables assigned</span>
+                        </td>
+                        <td class="p-4" th:text="${sec.assignedEmployee != null ? sec.assignedEmployee.name : 'None'}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

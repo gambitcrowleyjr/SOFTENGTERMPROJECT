@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">👥 Employee Management</h1>
+            <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
+        </div>
+
+        <!-- Add Employee Form -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-bold mb-4">Add New Employee</h2>
+            <form th:action="@{/manager/employees/add}" method="post" class="flex gap-4">
+                <input type="text" name="employeeId" placeholder="Employee ID (e.g., E001)" required class="border p-2 rounded flex-1">
+                <input type="text" name="name" placeholder="Full Name" required class="border p-2 rounded flex-1">
+                <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">Add Employee</button>
+            </form>
+        </div>
+
+        <!-- Employee List -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 border-b">
+                    <tr>
+                        <th class="p-4 font-bold text-gray-700">ID</th>
+                        <th class="p-4 font-bold text-gray-700">Name</th>
+                        <th class="p-4 font-bold text-gray-700">Assigned Section</th>
+                        <th class="p-4 font-bold text-gray-700">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="emp : ${employees}" class="border-b hover:bg-gray-50 transition">
+                        <td class="p-4" th:text="${emp.employeeId}"></td>
+                        <td class="p-4" th:text="${emp.name}"></td>
+                        <td class="p-4" th:text="${emp.assignedSection != null ? emp.assignedSection.name : 'Unassigned'}"></td>
+                        <td class="p-4">
+                            <form th:action="@{/manager/employees/assign-section}" method="post" class="flex gap-2">
+                                <input type="hidden" name="employeeId" th:value="${emp.id}">
+                                <select name="sectionId" class="border p-1 rounded text-sm">
+                                    <option value="" disabled selected>Select Section</option>
+                                    <option th:each="sec : ${sections}" th:value="${sec.id}" th:text="${sec.name}"></option>
+                                </select>
+                                <button type="submit" class="text-xs bg-indigo-500 text-white px-2 py-1 rounded hover:bg-indigo-600">Assign</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
