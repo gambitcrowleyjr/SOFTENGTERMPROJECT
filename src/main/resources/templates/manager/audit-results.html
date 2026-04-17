@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Waste & Shrinkage Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">📉 Audit Results</h1>
+            <a href="/manager/audit" class="text-indigo-600 hover:underline">New Audit</a>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Item</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Theoretical</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Actual</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Variance</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Variance %</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr th:each="row : ${report}" class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 font-bold text-gray-800" th:text="${row.itemName}">Item Name</td>
+                        <td class="px-6 py-4 text-gray-600" th:text="${#numbers.formatDecimal(row.theoretical, 1, 2)}">0.00</td>
+                        <td class="px-6 py-4 text-gray-600" th:text="${#numbers.formatDecimal(row.actual, 1, 2)}">0.00</td>
+                        <td class="px-6 py-4 font-bold" 
+                            th:classappend="${row.variance >= 0 ? 'text-red-600' : 'text-green-600'}"
+                            th:text="${#numbers.formatDecimal(row.variance, 1, 2)}">0.00</td>
+                        <td class="px-6 py-4 text-gray-600" th:text="${#numbers.formatDecimal(row.variancePercent, 1, 2) + '%'}">0.0%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -13,7 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import com.diner.inventory.repository.InventorySnapshotRepository;
+import com.diner.inventory.model.InventorySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,53 @@ public class ManagerController {
     private final ManagerService managerService;
     private final InventoryService inventoryService;
     private final MenuService menuService;
+
     private final ReportService reportService;
     private final InventoryItemRepository inventoryItemRepository;
+    private final InventorySnapshotRepository inventorySnapshotRepository;
     private final com.diner.inventory.service.EmployeeService employeeService;
+
+    @GetMapping("/audit")
+    public String showAuditForm(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        model.addAttribute("snapshots", inventorySnapshotRepository.findAll());
+        return "manager/audit";
+    }
+
+    @PostMapping("/audit/results")
+    public String showAuditResults(@RequestParam(required = false) Long startId, @RequestParam(required = false) Long endId, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        
+        if (startId == null || endId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select two valid snapshots.");
+            return "redirect:/manager/audit";
+        }
+
+        var startSnap = inventorySnapshotRepository.findById(startId);
+        var endSnap = inventorySnapshotRepository.findById(endId);
+
+        if (startSnap.isEmpty() || endSnap.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Selected snapshots could not be found.");
+            return "redirect:/manager/audit";
+        }
+        
+        model.addAttribute("report", reportService.generateVarianceReport(startId, endId, startSnap.get().getCreatedAt(), endSnap.get().getCreatedAt()));
+        return "manager/audit-results";
+    }
+
+    @GetMapping("/waste")
+    public String showWasteForm(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        model.addAttribute("items", inventoryService.getAllInventory());
+        return "manager/waste-record";
+    }
+
+    @PostMapping("/waste")
+    public String recordWaste(@RequestParam Long itemId, @RequestParam Double amount, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        inventoryService.recordWaste(itemId, amount);
+        return "redirect:/manager/dashboard";
+    }
 
     @GetMapping("/login")
     public String showLoginForm() {

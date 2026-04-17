@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Record Waste</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">🗑️ Record Inventory Waste</h1>
+            <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
+        </div>
+
+        <form th:action="@{/manager/waste}" method="post" class="bg-white p-8 rounded-3xl shadow-xl">
+            <div class="mb-6">
+                <label class="block text-gray-700 font-bold mb-2">Inventory Item:</label>
+                <select name="itemId" class="w-full p-3 border border-gray-300 rounded-xl" required>
+                    <option th:each="item : ${items}" th:value="${item.id}" th:text="${item.name + ' (Stock: ' + item.stockLevel + ')'}"></option>
+                </select>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 font-bold mb-2">Wasted Amount:</label>
+                <input type="number" name="amount" step="0.01" class="w-full p-3 border border-gray-300 rounded-xl" placeholder="0.00" required>
+            </div>
+            <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition">Record Waste</button>
+        </form>
+    </div>
+</body>
+</html>

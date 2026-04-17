@@ -44,6 +44,13 @@ public class InventoryController {
         return "inventory/unload-orders";
     }
 
+    @PostMapping("/snapshot")
+    public String saveSnapshot(RedirectAttributes redirectAttributes) {
+        inventoryService.createSnapshot();
+        redirectAttributes.addFlashAttribute("successMessage", "Inventory snapshot saved successfully!");
+        return "redirect:/inventory";
+    }
+
     @PostMapping("/add-stock")
     public String addStock(@RequestParam Long itemId, @RequestParam Double amount, @RequestParam Double totalPrice, RedirectAttributes redirectAttributes) {
         Double pricePerUnit = (amount != null && amount > 0) ? totalPrice / amount : 0.0;
