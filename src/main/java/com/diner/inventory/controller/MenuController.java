@@ -29,35 +29,4 @@ public class MenuController {
         return "menu/list";
     }
 
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        MenuItem menuItem = new MenuItem();
-        model.addAttribute("menuItem", menuItem);
-        model.addAttribute("allInventoryItems", inventoryService.getAllInventory());
-        return "menu/create";
-    }
-
-    @PostMapping("/create")
-    public String createMenuItem(@ModelAttribute MenuItem menuItem, 
-                                 @RequestParam(required = false) List<Long> inventoryItemIds,
-                                 @RequestParam(required = false) List<Double> quantities) {
-        List<MenuItemIngredient> ingredients = new ArrayList<>();
-        if (inventoryItemIds != null && quantities != null) {
-            for (int i = 0; i < inventoryItemIds.size(); i++) {
-                Long invId = inventoryItemIds.get(i);
-                Double qty = quantities.get(i);
-                if (invId != null && qty != null) {
-                    MenuItemIngredient ingredient = new MenuItemIngredient();
-                    InventoryItem invItem = inventoryItemRepository.findById(invId).orElse(null);
-                    ingredient.setInventoryItem(invItem);
-                    ingredient.setQuantityRequired(qty);
-                    ingredients.add(ingredient);
-                }
-            }
-        }
-        menuItem.setIngredients(ingredients);
-        menuService.createMenuItem(menuItem);
-        return "redirect:/menu";
-    }
-
 }

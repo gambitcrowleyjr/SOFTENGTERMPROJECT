@@ -210,6 +210,42 @@ public class ManagerController {
         return "menu/modify-select";
     }
 
+    @GetMapping("/menu/create")
+    public String showCreateForm(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        MenuItem menuItem = new MenuItem();
+        model.addAttribute("menuItem", menuItem);
+        model.addAttribute("allInventoryItems", inventoryService.getAllInventory());
+        return "menu/create";
+    }
+
+    @PostMapping("/menu/create")
+    public String createMenuItem(@ModelAttribute MenuItem menuItem,
+                                 @RequestParam(required = false) List<Long> inventoryItemIds,
+                                 @RequestParam(required = false) List<Double> quantities,
+                                 HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        List<MenuItemIngredient> ingredients = new ArrayList<>();
+        if (inventoryItemIds != null && quantities != null) {
+            for (int i = 0; i < inventoryItemIds.size(); i++) {
+                Long invId = inventoryItemIds.get(i);
+                Double qty = quantities.get(i);
+                if (invId != null && qty != null) {
+                    final Double finalQty = qty;
+                    inventoryItemRepository.findById(invId).ifPresent(invItem -> {
+                        MenuItemIngredient ingredient = new MenuItemIngredient();
+                        ingredient.setInventoryItem(invItem);
+                        ingredient.setQuantityRequired(finalQty);
+                        ingredients.add(ingredient);
+                    });
+                }
+            }
+        }
+        menuItem.setIngredients(ingredients);
+        menuService.createMenuItem(menuItem);
+        return "redirect:/menu";
+    }
+
     @GetMapping("/menu/modify/{id}")
     public String showEditForm(@PathVariable Long id, HttpSession session, Model model) {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
