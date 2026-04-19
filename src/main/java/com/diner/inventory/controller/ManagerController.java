@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.diner.inventory.repository.InventorySnapshotRepository;
 import com.diner.inventory.model.InventorySnapshot;
+import com.diner.inventory.model.InventoryItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -252,5 +253,28 @@ public class ManagerController {
     public String logout(HttpSession session) {
         session.removeAttribute("managerAuth");
         return "redirect:/";
+    }
+
+    @GetMapping("/inventory/add-item")
+    public String showAddItemForm(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        model.addAttribute("item", new InventoryItem());
+        return "inventory/add-item";
+    }
+
+    @PostMapping("/inventory/add-item")
+    public String addItem(@ModelAttribute InventoryItem item, 
+                          @RequestParam Double totalPrice, 
+                          HttpSession session,
+                          RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        if (item.getStockLevel() != null && item.getStockLevel() > 0) {
+            item.setCurrentPrice(totalPrice / item.getStockLevel());
+        } else {
+            item.setCurrentPrice(0.0);
+        }
+        inventoryService.createInventoryItem(item);
+        redirectAttributes.addFlashAttribute("successMessage", "New item cataloged: " + item.getName());
+        return "redirect:/inventory";
     }
 }
