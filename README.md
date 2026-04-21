@@ -33,3 +33,6 @@ A simple inventory management system built with Spring Boot, Thymeleaf, and SQLi
 - Create and manage menu items and their ingredients.
 - Waitstaff order tracking.
 - Automatic database schema updates.
+## Update Log
+
+- Added minor update on April 20, 2026
