@@ -4,6 +4,7 @@
 set -e
 
 echo "=== Diner Inventory System Setup ==="
+echo "Starting installation process..."
 
 # 1. Update package list if we're on Ubuntu/Debian
 if command -v apt-get >/dev/null 2>&1; then
