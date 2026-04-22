@@ -20,6 +20,8 @@ public class MenuItem {
 
     private Double price;
 
+    private Boolean deleted = false;
+
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItemIngredient> ingredients = new ArrayList<>();
 }

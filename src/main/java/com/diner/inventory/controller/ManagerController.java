@@ -285,6 +285,25 @@ public class ManagerController {
         return "redirect:/manager/dashboard";
     }
 
+    @GetMapping("/menu/delete")
+    public String showDeleteSelection(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        model.addAttribute("menuItems", menuService.getAllMenuItems());
+        return "menu/delete-select";
+    }
+
+    @PostMapping("/menu/delete/{id}")
+    public String deleteMenuItem(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        try {
+            menuService.deleteMenuItem(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Menu item deleted successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to delete menu item. It may be referenced in existing orders.");
+        }
+        return "redirect:/manager/dashboard";
+    }
+
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.removeAttribute("managerAuth");

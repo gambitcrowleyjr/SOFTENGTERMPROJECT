@@ -1,5 +1,5 @@
 package com.diner.inventory.model;
 
 public enum OrderStatus {
-    OPEN, COOKED, SERVED, PAID
+    OPEN, COOKED, SERVED, PAID, CANCELLED
 }

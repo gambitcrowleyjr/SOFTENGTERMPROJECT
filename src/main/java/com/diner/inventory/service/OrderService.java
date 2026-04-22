@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +53,7 @@ public class OrderService {
     }
 
     public List<Order> getOpenOrders() {
-        return orderRepository.findByStatusNot(OrderStatus.PAID);
+        return orderRepository.findByStatusIn(Arrays.asList(OrderStatus.OPEN, OrderStatus.COOKED, OrderStatus.SERVED));
     }
 
     public List<Order> getCompletedOrders() {

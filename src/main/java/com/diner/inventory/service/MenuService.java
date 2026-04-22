@@ -3,8 +3,11 @@ package com.diner.inventory.service;
 import com.diner.inventory.model.MenuItem;
 import com.diner.inventory.model.MenuItemIngredient;
 import com.diner.inventory.model.InventoryItem;
+import com.diner.inventory.model.Order;
+import com.diner.inventory.model.OrderStatus;
 import com.diner.inventory.repository.MenuItemRepository;
 import com.diner.inventory.repository.InventoryItemRepository;
+import com.diner.inventory.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +20,10 @@ public class MenuService {
     private final MenuItemRepository menuItemRepository;
     private final InventoryItemRepository inventoryItemRepository;
     private final ManagerService managerService;
+    private final OrderRepository orderRepository;
 
     public List<MenuItem> getAllMenuItems() {
-        return menuItemRepository.findAll();
+        return menuItemRepository.findByDeletedFalse();
     }
 
     public MenuItem getMenuItemById(Long id) {
@@ -79,6 +83,28 @@ public class MenuService {
         MenuItem menuItem = menuItemRepository.findById(menuItemId)
                 .orElseThrow(() -> new RuntimeException("Menu item not found"));
         deductStock(menuItem, 1);
+    }
+
+    @Transactional
+    public void deleteMenuItem(Long id) {
+        MenuItem menuItem = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+        
+        // Find all orders that contain this menu item and are active
+        List<Order> allOrders = orderRepository.findAll();
+        for (Order order : allOrders) {
+            if (order.getStatus() != OrderStatus.PAID && order.getStatus() != OrderStatus.CANCELLED) {
+                boolean containsItem = order.getItems().stream()
+                        .anyMatch(item -> item.getMenuItem() != null && item.getMenuItem().getId().equals(id));
+                if (containsItem) {
+                    order.setStatus(OrderStatus.CANCELLED);
+                    orderRepository.save(order);
+                }
+            }
+        }
+        
+        menuItem.setDeleted(true);
+        menuItemRepository.save(menuItem);
     }
 
     public double calculateMenuItemCost(MenuItem menuItem) {
