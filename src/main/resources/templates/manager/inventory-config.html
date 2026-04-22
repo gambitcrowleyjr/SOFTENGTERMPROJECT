@@ -40,6 +40,7 @@
                                 <div class="flex items-center space-x-2">
                                     <label class="text-sm text-gray-600 font-semibold">Min Stock:</label>
                                     <input type="number" name="alertThreshold" step="0.1" th:value="${item.alertThreshold}"
+                                           th:data-unit-type="${item.unitType}"
                                            class="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 threshold-input"
                                            th:disabled="${!item.highValue}">
                                 </div>
@@ -74,6 +75,18 @@
                     thresholdInput.value = 0;
                 }
             });
+        });
+
+        document.querySelectorAll('.threshold-input').forEach(input => {
+            const unitType = input.getAttribute('data-unit-type');
+            if (unitType === 'UNIT') {
+                input.step = '1';
+                if (input.value) {
+                    input.value = Math.round(input.value);
+                }
+            } else {
+                input.step = '0.01';
+            }
         });
     </script>
 </body>

@@ -15,16 +15,43 @@
         <form th:action="@{/manager/waste}" method="post" class="bg-white p-8 rounded-3xl shadow-xl">
             <div class="mb-6">
                 <label class="block text-gray-700 font-bold mb-2">Inventory Item:</label>
-                <select name="itemId" class="w-full p-3 border border-gray-300 rounded-xl" required>
-                    <option th:each="item : ${items}" th:value="${item.id}" th:text="${item.name + ' (Stock: ' + item.stockLevel + ')'}"></option>
+                <select name="itemId" id="itemId" class="w-full p-3 border border-gray-300 rounded-xl" required>
+                    <option th:each="item : ${items}" 
+                            th:value="${item.id}" 
+                            th:data-unit-type="${item.unitType}"
+                            th:text="${item.name + ' (Stock: ' + item.stockLevel + ' ' + item.unitType + ')'}"></option>
                 </select>
             </div>
             <div class="mb-6">
                 <label class="block text-gray-700 font-bold mb-2">Wasted Amount:</label>
-                <input type="number" name="amount" step="0.01" class="w-full p-3 border border-gray-300 rounded-xl" placeholder="0.00" required>
+                <input type="number" id="amount" name="amount" step="0.01" class="w-full p-3 border border-gray-300 rounded-xl" placeholder="0.00" required>
             </div>
             <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition">Record Waste</button>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const itemSelect = document.getElementById('itemId');
+            const amountInput = document.getElementById('amount');
+
+            function updateStep() {
+                const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+                const unitType = selectedOption ? selectedOption.getAttribute('data-unit-type') : null;
+
+                if (unitType === 'POUND') {
+                    amountInput.step = '0.01';
+                } else {
+                    amountInput.step = '1';
+                    if (amountInput.value) {
+                        amountInput.value = Math.round(amountInput.value);
+                    }
+                }
+            }
+
+            itemSelect.addEventListener('change', updateStep);
+            updateStep();
+        });
+    </script>
 </body>
 </html>

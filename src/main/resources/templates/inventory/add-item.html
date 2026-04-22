@@ -15,14 +15,14 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Unit Type</label>
-                <select th:field="*{unitType}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
+                <select th:field="*{unitType}" id="unitType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
                     <option th:each="type : ${T(com.diner.inventory.model.UnitType).values()}" 
                             th:value="${type}" th:text="${type}"></option>
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Initial Stock (Units or Pounds)</label>
-                <input type="number" step="0.01" th:field="*{stockLevel}" value="0" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
+                <input type="number" step="0.01" th:field="*{stockLevel}" id="stockLevel" value="0" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Total Price of Order</label>
@@ -34,5 +34,26 @@
             </div>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const unitTypeSelect = document.getElementById('unitType');
+            const stockLevelInput = document.getElementById('stockLevel');
+
+            function updateStep() {
+                if (unitTypeSelect.value === 'POUND') {
+                    stockLevelInput.step = '0.01';
+                } else {
+                    stockLevelInput.step = '1';
+                    if (stockLevelInput.value) {
+                        stockLevelInput.value = Math.round(stockLevelInput.value);
+                    }
+                }
+            }
+
+            unitTypeSelect.addEventListener('change', updateStep);
+            updateStep();
+        });
+    </script>
 </body>
 </html>
