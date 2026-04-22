@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reports</title>
+</head>
+<body>
+
+<h1>Generate Report</h1>
+
+<form action="/reports" method="get">
+    <label>Start Date:</label>
+    <input type="date" name="startDate" required>
+
+    <label>End Date:</label>
+    <input type="date" name="endDate" required>
+
+    <button type="submit">Generate Report</button>
+</form>
+
+<h2>Report Results</h2>
+
+<p>Sales: $<span th:text="${sales}"></span></p>
+<p>Materials: $<span th:text="${materials}"></span></p>
+<p>Waste: $<span th:text="${waste}"></span></p>
+
+</body>
+</html>
