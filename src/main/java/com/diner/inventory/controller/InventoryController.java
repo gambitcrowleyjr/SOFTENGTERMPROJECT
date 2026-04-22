@@ -39,4 +39,18 @@ public class InventoryController {
         redirectAttributes.addFlashAttribute("successMessage", "Stock updated successfully!");
         return "redirect:/inventory";
     }
+    
+    @GetMapping("/reports")
+    public String reports(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            Model model) {
+
+        model.addAttribute("sales", 1000);
+        model.addAttribute("materials", 400);
+        model.addAttribute("waste", 100);
+
+        return "reports";
+    }
+
 }
