@@ -39,9 +39,10 @@
                         <td class="p-4" th:text="${emp.name}"></td>
                         <td class="p-4" th:text="${emp.assignedSection != null ? emp.assignedSection.name : 'Unassigned'}"></td>
                         <td class="p-4">
-                            <form th:action="@{/manager/employees/assign-section}" method="post" class="flex gap-2">
+                            <form th:action="@{/manager/employees/assign-section}" method="post" class="flex gap-2" 
+                                  onsubmit="const select = this.querySelector('select[name=sectionId]'); if(!select.value) { alert('Please select a section before assigning.'); return false; }">
                                 <input type="hidden" name="employeeId" th:value="${emp.id}">
-                                <select name="sectionId" class="border p-1 rounded text-sm">
+                                <select name="sectionId" class="border p-1 rounded text-sm" required>
                                     <option value="" disabled selected>Select Section</option>
                                     <option th:each="sec : ${sections}" th:value="${sec.id}" th:text="${sec.name}"></option>
                                 </select>

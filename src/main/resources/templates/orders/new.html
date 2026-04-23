@@ -53,9 +53,11 @@
                 <!-- Table Number Input -->
                 <div class="p-4 border-b border-gray-100 bg-gray-50">
                     <label for="tableNumber" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Table Number</label>
-                    <input type="text" name="tableNumber" id="tableNumber" required 
-                           class="w-full px-4 py-2 rounded-xl border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 text-xl font-black text-indigo-600"
-                           placeholder="Ex: 5 or A1">
+                    <select name="tableNumber" id="tableNumber" required 
+                           class="w-full px-4 py-2 rounded-xl border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 text-xl font-black text-indigo-600">
+                        <option value="" disabled selected>Select Table</option>
+                        <option th:each="table : ${tables}" th:value="${table.tableNumber}" th:text="'Table ' + ${table.tableNumber}"></option>
+                    </select>
                 </div>
 
                 <!-- Items List -->

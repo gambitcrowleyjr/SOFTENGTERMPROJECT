@@ -40,8 +40,9 @@ public class EmployeeService {
     }
 
     @Transactional
-    public void assignTableToSection(Long tableId, Long sectionId) {
-        DiningTable table = diningTableRepository.findById(tableId).orElseThrow();
+    public void assignTableToSection(String tableNumber, Long sectionId) {
+        DiningTable table = diningTableRepository.findByTableNumber(tableNumber)
+                .orElseGet(() -> new DiningTable(tableNumber));
         Section section = sectionRepository.findById(sectionId).orElseThrow();
         table.setSection(section);
         diningTableRepository.save(table);
@@ -51,6 +52,12 @@ public class EmployeeService {
     public void assignSectionToEmployee(Long employeeId, Long sectionId) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow();
         Section section = sectionRepository.findById(sectionId).orElseThrow();
+        
+        // Clear any previous employee assigned to this section (to respect @OneToOne)
+        if (section.getAssignedEmployee() != null) {
+            section.getAssignedEmployee().setAssignedSection(null);
+        }
+        
         employee.setAssignedSection(section);
         employeeRepository.save(employee);
     }

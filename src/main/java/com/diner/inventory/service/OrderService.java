@@ -21,9 +21,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final MenuItemRepository menuItemRepository;
     private final MenuService menuService;
+    private final com.diner.inventory.repository.DiningTableRepository diningTableRepository;
 
     @Transactional
     public Order createOrder(String tableNumber, Map<Long, Integer> itemQuantities) {
+        if (diningTableRepository.findByTableNumber(tableNumber).isEmpty()) {
+            throw new RuntimeException("Table " + tableNumber + " does not exist.");
+        }
         Order order = new Order();
         order.setTableNumber(tableNumber);
         

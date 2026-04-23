@@ -19,10 +19,12 @@ import java.util.stream.Collectors;
 public class OrderController {
     private final OrderService orderService;
     private final MenuService menuService;
+    private final com.diner.inventory.service.EmployeeService employeeService;
 
     @GetMapping("/new")
     public String showNewOrderForm(Model model) {
         model.addAttribute("menuItems", menuService.getAllMenuItems());
+        model.addAttribute("tables", employeeService.getAllTables());
         return "orders/new";
     }
 

@@ -172,9 +172,9 @@ public class ManagerController {
     }
 
     @PostMapping("/sections/assign-table")
-    public String assignTable(@RequestParam Long tableId, @RequestParam Long sectionId, HttpSession session) {
+    public String assignTable(@RequestParam String tableNumber, @RequestParam Long sectionId, HttpSession session) {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
-        employeeService.assignTableToSection(tableId, sectionId);
+        employeeService.assignTableToSection(tableNumber, sectionId);
         return "redirect:/manager/sections";
     }
 
