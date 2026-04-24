@@ -17,3 +17,12 @@ public class ManagerOrderSheetController {
         return "redirect:/manager/order-sheet/create";
     }
 }
+@GetMapping("/manager/order-sheet/validate")
+public String showValidateOrderSheetPage() {
+    return "validate-order-sheet";
+}
+
+@PostMapping("/manager/order-sheet/validate")
+public String validateOrderSheet() {
+    return "redirect:/manager/order-sheet/validate";
+}
