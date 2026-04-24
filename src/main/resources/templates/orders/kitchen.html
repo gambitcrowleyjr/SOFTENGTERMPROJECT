@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kitchen Display</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+            <h1 class="text-4xl font-black">🍳 Kitchen Display</h1>
+            <a href="/orders/open" class="text-indigo-400 hover:text-indigo-300">Back to Front-of-House</a>
+        </div>
+
+        <div th:if="${successMessage}" class="mb-6 p-4 bg-green-900 text-green-100 border-l-4 border-green-500 rounded-r">
+            <p th:text="${successMessage}"></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="order : ${orders}" th:if="${order.status.name() != 'SERVED'}" class="bg-gray-800 rounded-2xl p-6 border-2" 
+                 th:classappend="${order.status.name() == 'COOKED' ? 'border-orange-500' : 'border-gray-700'}">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-xs font-bold text-gray-500 uppercase">Table</span>
+                        <h2 class="text-5xl font-black" th:text="${order.tableNumber}">5</h2>
+                    </div>
+                    <span th:text="${order.status}" class="px-3 py-1 rounded-full text-xs font-bold uppercase"
+                          th:classappend="${order.status.name() == 'COOKED' ? 'bg-orange-900 text-orange-200' : 'bg-gray-700 text-gray-300'}"></span>
+                </div>
+                
+                <ul class="space-y-2 mb-6">
+                    <li th:each="item : ${order.items}" class="flex items-center text-lg">
+                        <span class="bg-gray-700 w-8 h-8 flex items-center justify-center rounded-lg font-bold mr-3" th:text="${item.quantity}">1</span>
+                        <span th:text="${item.menuItem.name}">Burger</span>
+                    </li>
+                </ul>
+
+                <form th:if="${order.status.name() == 'OPEN'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="POST">
+                    <input type="hidden" name="status" value="COOKED">
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-black py-4 rounded-xl text-xl transition">
+                        READY TO SERVE
+                    </button>
+                </form>
+                <form th:if="${order.status.name() == 'COOKED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="POST">
+                    <input type="hidden" name="status" value="SERVED">
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl text-xl transition">
+                        SERVE ORDER
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(orders)}" class="text-center py-20 border-2 border-dashed border-gray-700 rounded-3xl">
+            <p class="text-gray-500 text-2xl">Kitchen is clear!</p>
+        </div>
+    </div>
+</body>
+</html>

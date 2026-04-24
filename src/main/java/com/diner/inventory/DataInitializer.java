@@ -15,6 +15,14 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        if (diningTableRepository.count() == 0) {
+            diningTableRepository.save(new DiningTable("A1"));
+            diningTableRepository.save(new DiningTable("A2"));
+            diningTableRepository.save(new DiningTable("B1"));
+            diningTableRepository.save(new DiningTable("B2"));
+            diningTableRepository.save(new DiningTable("C1"));
+        }
+
         if (inventoryItemRepository.count() == 0) {
             com.diner.inventory.model.InventoryItem i1 = new com.diner.inventory.model.InventoryItem();
             i1.setName("Burger Patty");

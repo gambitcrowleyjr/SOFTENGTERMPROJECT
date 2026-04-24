@@ -55,6 +55,12 @@ public class OrderController {
         return "orders/open";
     }
 
+    @GetMapping("/kitchen")
+    public String kitchenView(Model model) {
+        model.addAttribute("orders", orderService.getOpenOrders());
+        return "orders/kitchen";
+    }
+
     @PostMapping("/{id}/status")
     public String updateStatus(@PathVariable Long id, @RequestParam OrderStatus status, RedirectAttributes redirectAttributes) {
         try {
@@ -62,6 +68,9 @@ public class OrderController {
             redirectAttributes.addFlashAttribute("successMessage", "Order status updated to " + status);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating status: " + e.getMessage());
+        }
+        if (status == OrderStatus.COOKED || status == OrderStatus.SERVED) {
+            return "redirect:/orders/kitchen";
         }
         return "redirect:/orders/open";
     }
