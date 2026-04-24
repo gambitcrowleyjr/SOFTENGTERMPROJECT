@@ -32,6 +32,44 @@ public class ManagerController {
     private final InventoryItemRepository inventoryItemRepository;
     private final InventorySnapshotRepository inventorySnapshotRepository;
     private final com.diner.inventory.service.EmployeeService employeeService;
+    private final com.diner.inventory.service.SupplyOrderService supplyOrderService;
+
+    @GetMapping("/supply-orders")
+    public String listSupplyOrders(HttpSession session, Model model) {
+        return "redirect:/manager/dashboard";
+    }
+
+    @GetMapping("/supply-orders/create")
+    public String showCreateSupplyOrderForm(HttpSession session, Model model) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        model.addAttribute("items", inventoryService.getAllInventory());
+        return "manager/supply-orders/create";
+    }
+
+    @PostMapping("/supply-orders/create")
+    public String createSupplyOrder(@RequestParam Map<String, String> params, HttpSession session, RedirectAttributes redirectAttributes) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        
+        java.util.Map<Long, Double> quantities = new java.util.HashMap<>();
+        params.forEach((key, value) -> {
+            if (key.startsWith("item_") && !value.isEmpty()) {
+                Long itemId = Long.parseLong(key.substring(5));
+                Double qty = Double.parseDouble(value);
+                if (qty > 0) {
+                    quantities.put(itemId, qty);
+                }
+            }
+        });
+
+        try {
+            supplyOrderService.createSupplyOrder(quantities);
+            redirectAttributes.addFlashAttribute("successMessage", "Supply order created successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/manager/supply-orders/create";
+        }
+        return "redirect:/manager/dashboard";
+    }
 
     @GetMapping("/audit")
     public String showAuditForm(HttpSession session, Model model) {
