@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Validate Supply Order</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">🚛 Validate & Unload Order</h1>
+            <a href="/inventory/unload-orders" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 shadow transition">Back to List</a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                <p class="text-blue-700"><strong>Order ID:</strong> <span th:text="${order.id}"></span></p>
+                <p class="text-blue-700"><strong>Created:</strong> <span th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+            </div>
+
+            <form th:action="@{/inventory/supply-orders/validate/{id}(id=${order.id})}" method="POST">
+                <table class="w-full text-left mb-8">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3 text-sm font-semibold text-gray-600">Item Name</th>
+                            <th class="px-6 py-3 text-sm font-semibold text-gray-600">Ordered Qty</th>
+                            <th class="px-6 py-3 text-sm font-semibold text-gray-600">Received Qty</th>
+                            <th class="px-6 py-3 text-sm font-semibold text-gray-600">Unit Price ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr th:each="item : ${order.items}" class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 text-sm text-gray-800 font-medium" th:text="${item.inventoryItem.name}"></td>
+                            <td class="px-6 py-4 text-sm text-gray-600" th:text="${item.quantityOrdered + ' ' + item.inventoryItem.unitType}"></td>
+                            <td class="px-6 py-4">
+                                <input type="number" th:step="${item.inventoryItem.unitType.name() == 'UNIT' ? '1' : 'any'}" th:name="'received_' + ${item.id}" th:value="${item.quantityOrdered}" required class="w-32 p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            </td>
+                            <td class="px-6 py-4">
+                                <input type="number" step="0.01" th:name="'price_' + ${item.id}" th:value="${item.inventoryItem.currentPrice}" required class="w-32 p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="flex justify-end space-x-4">
+                    <button type="submit" class="bg-green-600 text-white px-8 py-3 rounded-md hover:bg-green-700 shadow-lg font-bold transition">Confirm Receipt & Update Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
