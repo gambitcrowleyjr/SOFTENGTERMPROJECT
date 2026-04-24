@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Unload Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800">🚛 Unload New Shipments</h1>
+        <p class="mb-6 text-gray-600">Select an item and enter the amount received from the delivery.</p>
+        <form th:action="@{/inventory/add-stock}" method="POST" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Inventory Item</label>
+                <select name="itemId" id="itemId" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
+                    <option value="" disabled selected>Choose an item...</option>
+                    <option th:each="item : ${items}" 
+                            th:value="${item.id}" 
+                            th:data-unit-type="${item.unitType}"
+                            th:text="${item.name + ' (' + item.unitType + ')'}"></option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Amount Received (Units or Pounds)</label>
+                <input type="number" id="amount" step="0.01" name="amount" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Total Order Price</label>
+                <input type="number" step="0.01" name="totalPrice" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 border p-2">
+            </div>
+            <div class="flex space-x-4">
+                <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 shadow transition">Confirm Stock Addition</button>
+                <a href="/" class="w-full text-center bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 shadow transition">Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const itemSelect = document.getElementById('itemId');
+            const amountInput = document.getElementById('amount');
+
+            function updateStep() {
+                const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+                const unitType = selectedOption ? selectedOption.getAttribute('data-unit-type') : null;
+
+                if (unitType === 'POUND') {
+                    amountInput.step = '0.01';
+                } else {
+                    amountInput.step = '1';
+                    if (amountInput.value) {
+                        amountInput.value = Math.round(amountInput.value);
+                    }
+                }
+            }
+
+            itemSelect.addEventListener('change', updateStep);
+            updateStep();
+        });
+    </script>
+</body>
+</html>
