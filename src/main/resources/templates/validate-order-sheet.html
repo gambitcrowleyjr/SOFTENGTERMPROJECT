@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Validate Order Sheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+
+<h1 class="text-2xl font-bold mb-4">Validate Order Sheet</h1>
+
+<p class="mb-4">Check off items as they are unloaded from the truck.</p>
+
+<form action="/manager/order-sheet/validate" method="post" class="bg-white p-6 rounded shadow max-w-md">
+    <label class="block mb-3">
+        <input type="checkbox" name="receivedItems" value="item1">
+        Item received
+    </label>
+
+    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded">
+        Validate Order Sheet
+    </button>
+</form>
+
+</body>
+</html>
