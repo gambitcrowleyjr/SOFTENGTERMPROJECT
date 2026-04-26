@@ -54,6 +54,7 @@
                     <!-- Workflow buttons -->
                     <form th:if="${order.status.name() == 'OPEN'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="POST">
                         <input type="hidden" name="status" value="COOKED">
+                        <input type="hidden" name="view" value="open">
                         <button type="submit" class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition shadow-lg shadow-orange-200">
                             Mark as Cooked (Deduct Stock)
                         </button>
@@ -61,6 +62,7 @@
 
                     <form th:if="${order.status.name() == 'COOKED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="POST">
                         <input type="hidden" name="status" value="SERVED">
+                        <input type="hidden" name="view" value="open">
                         <button type="submit" class="w-full bg-blue-500 text-white font-bold py-3 rounded-xl hover:bg-blue-600 transition shadow-lg shadow-blue-200">
                             Mark as Served
                         </button>
@@ -68,6 +70,7 @@
 
                     <form th:if="${order.status.name() == 'SERVED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="POST">
                         <input type="hidden" name="status" value="PAID">
+                        <input type="hidden" name="view" value="open">
                         <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-200">
                             Complete & Pay
                         </button>

@@ -56,25 +56,29 @@ public class OrderController {
 
     @GetMapping("/open")
     public String listOpenOrders(Model model) {
-        model.addAttribute("orders", orderService.getOpenOrders());
+        model.addAttribute("orders", orderService.getFOHOrders());
         return "orders/open";
     }
 
     @GetMapping("/kitchen")
     public String kitchenView(Model model) {
-        model.addAttribute("orders", orderService.getOpenOrders());
+        model.addAttribute("orders", orderService.getKitchenOrders());
         return "orders/kitchen";
     }
 
     @PostMapping("/{id}/status")
-    public String updateStatus(@PathVariable Long id, @RequestParam OrderStatus status, RedirectAttributes redirectAttributes) {
+    public String updateStatus(@PathVariable Long id, 
+                              @RequestParam OrderStatus status, 
+                              @RequestParam(required = false) String view,
+                              RedirectAttributes redirectAttributes) {
         try {
             orderService.updateStatus(id, status);
             redirectAttributes.addFlashAttribute("successMessage", "Order status updated to " + status);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating status: " + e.getMessage());
         }
-        if (status == OrderStatus.COOKED || status == OrderStatus.SERVED) {
+        
+        if ("kitchen".equals(view)) {
             return "redirect:/orders/kitchen";
         }
         return "redirect:/orders/open";

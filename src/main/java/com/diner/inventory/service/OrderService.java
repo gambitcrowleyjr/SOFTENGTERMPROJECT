@@ -60,6 +60,14 @@ public class OrderService {
         return orderRepository.findByStatusIn(Arrays.asList(OrderStatus.OPEN, OrderStatus.COOKED, OrderStatus.SERVED));
     }
 
+    public List<Order> getKitchenOrders() {
+        return orderRepository.findByStatus(OrderStatus.OPEN);
+    }
+
+    public List<Order> getFOHOrders() {
+        return orderRepository.findByStatusIn(Arrays.asList(OrderStatus.COOKED, OrderStatus.SERVED));
+    }
+
     public List<Order> getCompletedOrders() {
         return orderRepository.findByStatus(OrderStatus.PAID);
     }

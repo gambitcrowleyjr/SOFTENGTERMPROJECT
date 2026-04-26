@@ -37,12 +37,14 @@
 
                 <form th:if="${order.status.name() == 'OPEN'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="POST">
                     <input type="hidden" name="status" value="COOKED">
+                    <input type="hidden" name="view" value="kitchen">
                     <button type="submit" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-black py-4 rounded-xl text-xl transition">
                         READY TO SERVE
                     </button>
                 </form>
                 <form th:if="${order.status.name() == 'COOKED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="POST">
                     <input type="hidden" name="status" value="SERVED">
+                    <input type="hidden" name="view" value="kitchen">
                     <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl text-xl transition">
                         SERVE ORDER
                     </button>
