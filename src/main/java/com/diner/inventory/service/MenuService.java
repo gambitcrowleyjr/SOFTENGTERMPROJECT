@@ -47,6 +47,7 @@ public class MenuService {
                 .orElseThrow(() -> new RuntimeException("Menu item not found"));
         
         existingMenuItem.setName(updatedMenuItem.getName());
+        existingMenuItem.setCategory(updatedMenuItem.getCategory());
         existingMenuItem.setPrice(updatedMenuItem.getPrice());
         
         // Clear existing ingredients and add new ones

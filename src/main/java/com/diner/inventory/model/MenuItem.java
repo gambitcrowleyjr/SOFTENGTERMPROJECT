@@ -18,6 +18,8 @@ public class MenuItem {
 
     private String name;
 
+    private String category;
+
     private Double price;
 
     private Boolean deleted = false;

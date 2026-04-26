@@ -44,7 +44,7 @@ public class MenuServiceTest {
         // 2. Create an order with that menu item
         Map<Long, Integer> items = new HashMap<>();
         items.put(menuItemId, 1);
-        Order order = orderService.createOrder("1", items);
+        Order order = orderService.createOrder("A1", items);
         Long orderId = order.getId();
 
         assertEquals(OrderStatus.OPEN, order.getStatus());

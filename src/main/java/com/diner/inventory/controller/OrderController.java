@@ -23,7 +23,12 @@ public class OrderController {
 
     @GetMapping("/new")
     public String showNewOrderForm(Model model) {
-        model.addAttribute("menuItems", menuService.getAllMenuItems());
+        java.util.List<com.diner.inventory.model.MenuItem> allItems = menuService.getAllMenuItems();
+        java.util.Map<String, java.util.List<com.diner.inventory.model.MenuItem>> groupedItems = allItems.stream()
+                .collect(Collectors.groupingBy(item -> item.getCategory() != null ? item.getCategory() : "General"));
+        
+        model.addAttribute("groupedMenuItems", groupedItems);
+        model.addAttribute("categories", groupedItems.keySet());
         model.addAttribute("tables", employeeService.getAllTables());
         return "orders/new";
     }
@@ -55,6 +60,12 @@ public class OrderController {
         return "orders/open";
     }
 
+    @GetMapping("/kitchen")
+    public String kitchenView(Model model) {
+        model.addAttribute("orders", orderService.getOpenOrders());
+        return "orders/kitchen";
+    }
+
     @PostMapping("/{id}/status")
     public String updateStatus(@PathVariable Long id, @RequestParam OrderStatus status, RedirectAttributes redirectAttributes) {
         try {
@@ -62,6 +73,9 @@ public class OrderController {
             redirectAttributes.addFlashAttribute("successMessage", "Order status updated to " + status);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating status: " + e.getMessage());
+        }
+        if (status == OrderStatus.COOKED || status == OrderStatus.SERVED) {
+            return "redirect:/orders/kitchen";
         }
         return "redirect:/orders/open";
     }

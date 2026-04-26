@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Supply Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">📋 Unload Order Sheets</h1>
+            <div class="space-x-4">
+                <a href="/" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 shadow transition">Back to Main Menu</a>
+            </div>
+        </div>
+
+        <div th:if="${successMessage}" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 shadow" role="alert">
+            <p th:text="${successMessage}"></p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-sm font-semibold text-gray-600">ID</th>
+                        <th class="px-6 py-4 text-sm font-semibold text-gray-600">Date Created</th>
+                        <th class="px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
+                        <th class="px-6 py-4 text-sm font-semibold text-gray-600">Items</th>
+                        <th class="px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <tr th:each="order : ${orders}" class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 text-sm text-gray-800" th:text="${order.id}"></td>
+                        <td class="px-6 py-4 text-sm text-gray-800" th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td class="px-6 py-4">
+                            <span th:class="${order.status.name() == 'PENDING' ? 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold' : 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold'}"
+                                  th:text="${order.status}"></span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600" th:text="${order.items.size() + ' items'}"></td>
+                        <td class="px-6 py-4">
+                            <a th:if="${order.status.name() == 'PENDING'}" 
+                               th:href="@{/inventory/supply-orders/validate/{id}(id=${order.id})}" 
+                               class="text-indigo-600 hover:text-indigo-900 font-medium">Validate / Unload</a>
+                            <span th:if="${order.status.name() != 'PENDING'}" class="text-gray-400">Completed</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${orders.empty}">
+                        <td colspan="5" class="px-6 py-10 text-center text-gray-500">No supply orders found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
