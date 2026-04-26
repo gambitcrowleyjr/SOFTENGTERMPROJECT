@@ -68,7 +68,9 @@ public class ManagerService {
     public void checkAndCreateAlert(InventoryItem item) {
         // Stock Level Alert Only
         if (item.isHighValue() && item.getStockLevel() < item.getAlertThreshold()) {
-            Alert alert = new Alert();
+            Alert alert = alertRepository.findByInventoryItemIdAndIsReadFalse(item.getId())
+                    .orElse(new Alert());
+            
             alert.setInventoryItem(item);
             alert.setMessage("Low stock alert for high-value item: " + item.getName() + 
                             " (Current: " + item.getStockLevel() + ", Threshold: " + item.getAlertThreshold() + ")");
@@ -85,7 +87,9 @@ public class ManagerService {
             double percentageIncrease = (priceIncrease / item.getCurrentPrice()) * 100.0;
 
             if (percentageIncrease >= item.getPriceAlertThreshold()) {
-                Alert alert = new Alert();
+                Alert alert = alertRepository.findByInventoryItemIdAndIsReadFalse(item.getId())
+                        .orElse(new Alert());
+                
                 alert.setInventoryItem(item);
                 alert.setMessage(String.format("⚠️ Price Jump Alert: %s cost increased by %.1f%% (Was: $%.2f, Now: $%.2f)", 
                                  item.getName(), percentageIncrease, item.getCurrentPrice(), newPrice));
