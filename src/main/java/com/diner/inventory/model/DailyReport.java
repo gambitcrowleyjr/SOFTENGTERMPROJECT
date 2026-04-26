@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public class DailyReport {
     private LocalDate date;
     private Double totalEarnings;
-    private Double totalCosts;
-    private Double totalProfit;
+    private Double totalCosts;   // COGS from sold items
+    private Double varianceCost; // Value of items missing/wasted
+    private Double netProfit;    // Earnings - Costs - Variance
 }

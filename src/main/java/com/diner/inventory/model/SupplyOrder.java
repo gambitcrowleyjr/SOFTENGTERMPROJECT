@@ -19,6 +19,7 @@ public class SupplyOrder {
 
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime receivedAt;
+    private String validatedBy;
 
     @Enumerated(EnumType.STRING)
     private SupplyOrderStatus status = SupplyOrderStatus.PENDING;

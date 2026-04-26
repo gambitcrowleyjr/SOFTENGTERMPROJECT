@@ -10,31 +10,35 @@
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800">📊 Financial Reports</h1>
             <div class="space-x-4">
-                <a href="/manager/audit" class="text-orange-600 font-bold hover:underline">View Waste Audit</a>
                 <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
             </div>
         </div>
 
-        <!-- Range Selector -->
-        <div class="bg-white p-4 rounded-2xl shadow-md mb-8 flex space-x-4">
-            <a th:href="@{/manager/reports(range='daily')}" 
-               class="px-6 py-2 rounded-xl font-bold transition"
-               th:classappend="${range == 'daily' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">Daily</a>
-            <a th:href="@{/manager/reports(range='weekly')}" 
-               class="px-6 py-2 rounded-xl font-bold transition"
-               th:classappend="${range == 'weekly' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">Weekly</a>
-            <a th:href="@{/manager/reports(range='monthly')}" 
-               class="px-6 py-2 rounded-xl font-bold transition"
-               th:classappend="${range == 'monthly' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">Monthly</a>
-        </div>
+        <!-- Date Picker Form -->
+        <form th:action="@{/manager/reports}" method="get" class="bg-white p-6 rounded-2xl shadow-md mb-8 flex flex-wrap items-end gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Start Date</label>
+                <input type="date" name="startDate" th:value="${startDate}" 
+                       class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">End Date</label>
+                <input type="date" name="endDate" th:value="${endDate}" 
+                       class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <button type="submit" class="bg-indigo-600 text-white px-8 py-2 rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                Filter Results
+            </button>
+        </form>
 
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden mb-8">
             <table class="w-full text-left">
                 <thead class="bg-gray-50 border-b border-gray-100">
                     <tr>
                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Date</th>
                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Earnings</th>
                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Costs (COGS)</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Waste Cost</th>
                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Net Profit</th>
                     </tr>
                 </thead>
@@ -43,9 +47,10 @@
                         <td class="px-6 py-4 font-bold text-gray-800" th:text="${report.date}">2026-04-07</td>
                         <td class="px-6 py-4 text-green-600 font-bold" th:text="'$' + ${#numbers.formatDecimal(report.totalEarnings, 1, 2)}">$0.00</td>
                         <td class="px-6 py-4 text-red-500" th:text="'$' + ${#numbers.formatDecimal(report.totalCosts, 1, 2)}">$0.00</td>
+                        <td class="px-6 py-4 text-orange-600" th:text="'$' + ${#numbers.formatDecimal(report.varianceCost, 1, 2)}">$0.00</td>
                         <td class="px-6 py-4 font-black" 
-                            th:classappend="${report.totalProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}"
-                            th:text="'$' + ${#numbers.formatDecimal(report.totalProfit, 1, 2)}">$0.00</td>
+                            th:classappend="${report.netProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}"
+                            th:text="'$' + ${#numbers.formatDecimal(report.netProfit, 1, 2)}">$0.00</td>
                     </tr>
                 </tbody>
             </table>
@@ -53,6 +58,32 @@
             <div th:if="${#lists.isEmpty(reports)}" class="text-center py-20 bg-white">
                 <p class="text-gray-500 text-xl">No data found for this period.</p>
             </div>
+        </div>
+
+        <!-- Waste Details Section -->
+        <div th:if="${not #lists.isEmpty(wasteBreakdown)}" class="mt-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">🗑️ Recorded Waste Details (Selected Range)</h2>
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Item</th>
+                            <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Total Quantity</th>
+                            <th class="px-6 py-4 text-xs font-bold uppercase tracking-widest text-gray-400">Total Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr th:each="row : ${wasteBreakdown}" class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 font-bold text-gray-800" th:text="${row.itemName}">Item Name</td>
+                            <td class="px-6 py-4 text-gray-600" th:text="${#numbers.formatDecimal(row.quantity, 1, 2)}">0.00</td>
+                            <td class="px-6 py-4 font-bold text-orange-600" th:text="'$' + ${#numbers.formatDecimal(row.cost, 1, 2)}">$0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(wasteBreakdown)}" class="mt-12 p-8 bg-green-50 rounded-2xl border border-green-100 text-green-800">
+            <p class="font-bold">No waste was recorded during this period.</p>
         </div>
     </div>
 </body>

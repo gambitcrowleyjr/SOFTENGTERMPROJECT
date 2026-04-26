@@ -14,66 +14,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReportService {
     private final OrderRepository orderRepository;
-    private final InventorySnapshotRepository inventorySnapshotRepository;
     private final InventoryItemRepository inventoryItemRepository;
-
-    public Map<Long, Double> calculateTheoreticalUsage(LocalDateTime start, LocalDateTime end) {
-        List<Order> orders = orderRepository.findAll().stream()
-                .filter(o -> o.getStatus() == OrderStatus.PAID && o.getCompletedAt() != null)
-                .filter(o -> !o.getCompletedAt().isBefore(start) && !o.getCompletedAt().isAfter(end))
-                .collect(Collectors.toList());
-
-        Map<Long, Double> theoreticalUsage = new HashMap<>();
-
-        for (Order order : orders) {
-            for (OrderItem orderItem : order.getItems()) {
-                for (MenuItemIngredient ingredient : orderItem.getMenuItem().getIngredients()) {
-                    Long itemId = ingredient.getInventoryItem().getId();
-                    Double amount = ingredient.getQuantityRequired() * orderItem.getQuantity();
-                    theoreticalUsage.put(itemId, theoreticalUsage.getOrDefault(itemId, 0.0) + amount);
-                }
-            }
-        }
-        return theoreticalUsage;
-    }
-
-    public Map<Long, Double> calculateActualUsage(Long startSnapshotId, Long endSnapshotId) {
-        InventorySnapshot start = inventorySnapshotRepository.findById(startSnapshotId).orElseThrow();
-        InventorySnapshot end = inventorySnapshotRepository.findById(endSnapshotId).orElseThrow();
-
-        Map<Long, Double> actualUsage = new HashMap<>();
-        
-        for (InventoryItem item : start.getItemQuantities().keySet()) {
-            Double startQty = start.getItemQuantities().getOrDefault(item, 0.0);
-            Double endQty = end.getItemQuantities().getOrDefault(item, 0.0);
-            actualUsage.put(item.getId(), startQty - endQty);
-        }
-        return actualUsage;
-    }
-
-    public List<Map<String, Object>> generateVarianceReport(Long startSnapshotId, Long endSnapshotId, LocalDateTime start, LocalDateTime end) {
-        Map<Long, Double> theoretical = calculateTheoreticalUsage(start, end);
-        Map<Long, Double> actual = calculateActualUsage(startSnapshotId, endSnapshotId);
-        
-        List<Map<String, Object>> report = new ArrayList<>();
-        Set<Long> itemIds = new HashSet<>(theoretical.keySet());
-        itemIds.addAll(actual.keySet());
-
-        for (Long itemId : itemIds) {
-            Double t = theoretical.getOrDefault(itemId, 0.0);
-            Double a = actual.getOrDefault(itemId, 0.0);
-            
-            Map<String, Object> entry = new HashMap<>();
-            entry.put("itemId", itemId);
-            entry.put("itemName", inventoryItemRepository.findById(itemId).map(InventoryItem::getName).orElse("Unknown"));
-            entry.put("theoretical", t);
-            entry.put("actual", a);
-            entry.put("variance", t - a);
-            entry.put("variancePercent", t != 0 ? (t - a) / t * 100 : 0);
-            report.add(entry);
-        }
-        return report;
-    }
+    private final WasteRecordRepository wasteRecordRepository;
 
     public List<DailyReport> getReportsByDateRange(LocalDate start, LocalDate end) {
         List<Order> paidOrders = orderRepository.findByStatus(OrderStatus.PAID);
@@ -96,11 +38,47 @@ public class ReportService {
                     costs += (item.getCostAtOrder() != null ? item.getCostAtOrder() : 0.0) * item.getQuantity();
                 }
             }
-            reports.add(new DailyReport(date, earnings, costs, earnings - costs));
+
+            // Calculate Waste Cost for this day from recorded waste events
+            LocalDateTime dayStart = date.atStartOfDay();
+            LocalDateTime dayEnd = date.atTime(23, 59, 59);
+            
+            double wasteCost = wasteRecordRepository.findByRecordedAtBetween(dayStart, dayEnd)
+                    .stream()
+                    .mapToDouble(r -> r.getQuantity() * r.getCostAtTime())
+                    .sum();
+
+            reports.add(new DailyReport(date, earnings, costs, wasteCost, earnings - costs - wasteCost));
         }
         
         // Return reverse chronological order (newest first)
         Collections.reverse(reports);
         return reports;
+    }
+
+    public List<Map<String, Object>> getWasteBreakdown(LocalDate start, LocalDate end) {
+        LocalDateTime startTime = start.atStartOfDay();
+        LocalDateTime endTime = end.atTime(23, 59, 59);
+        
+        List<WasteRecord> records = wasteRecordRepository.findByRecordedAtBetween(startTime, endTime);
+        
+        Map<Long, List<WasteRecord>> groupedByItem = records.stream()
+                .collect(Collectors.groupingBy(r -> r.getInventoryItem().getId()));
+
+        List<Map<String, Object>> breakdown = new ArrayList<>();
+        for (Map.Entry<Long, List<WasteRecord>> entry : groupedByItem.entrySet()) {
+            InventoryItem item = inventoryItemRepository.findById(entry.getKey()).orElse(null);
+            if (item == null) continue;
+
+            double totalQty = entry.getValue().stream().mapToDouble(WasteRecord::getQuantity).sum();
+            double totalCost = entry.getValue().stream().mapToDouble(r -> r.getQuantity() * r.getCostAtTime()).sum();
+
+            Map<String, Object> itemData = new HashMap<>();
+            itemData.put("itemName", item.getName());
+            itemData.put("quantity", totalQty);
+            itemData.put("cost", totalCost);
+            breakdown.add(itemData);
+        }
+        return breakdown;
     }
 }

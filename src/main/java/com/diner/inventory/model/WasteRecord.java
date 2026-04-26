@@ -5,22 +5,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventorySnapshot {
+public class WasteRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @ManyToOne
+    @JoinColumn(name = "inventory_item_id")
+    private InventoryItem inventoryItem;
 
-    @ElementCollection
-    @MapKeyJoinColumn(name = "inventory_item_id")
-    @Column(name = "quantity")
-    private Map<InventoryItem, Double> itemQuantities = new HashMap<>();
+    private Double quantity;
+    private Double costAtTime;
+    private LocalDateTime recordedAt = LocalDateTime.now();
 }

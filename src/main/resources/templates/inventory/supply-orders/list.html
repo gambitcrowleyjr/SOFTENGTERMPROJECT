@@ -25,6 +25,7 @@
                         <th class="px-6 py-4 text-sm font-semibold text-gray-600">ID</th>
                         <th class="px-6 py-4 text-sm font-semibold text-gray-600">Date Created</th>
                         <th class="px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
+                        <th class="px-6 py-4 text-sm font-semibold text-gray-600">Validator</th>
                         <th class="px-6 py-4 text-sm font-semibold text-gray-600">Items</th>
                         <th class="px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
                     </tr>
@@ -37,6 +38,7 @@
                             <span th:class="${order.status.name() == 'PENDING' ? 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold' : 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold'}"
                                   th:text="${order.status}"></span>
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-800 font-mono" th:text="${order.validatedBy ?: '-'}"></td>
                         <td class="px-6 py-4 text-sm text-gray-600" th:text="${order.items.size() + ' items'}"></td>
                         <td class="px-6 py-4">
                             <a th:if="${order.status.name() == 'PENDING'}" 
@@ -51,6 +53,65 @@
                 </tbody>
             </table>
         </div>
+        <!-- Advanced Pagination Controls -->
+        <div class="mt-8 flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-xl shadow-md gap-6">
+            <div class="flex items-center gap-4">
+                <label for="pageSize" class="text-sm font-semibold text-gray-600">Items per page:</label>
+                <select id="pageSize" name="size" onchange="changeSize(this.value)" class="p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    <option value="10" th:selected="${pageSize == 10}">10</option>
+                    <option value="25" th:selected="${pageSize == 25}">25</option>
+                    <option value="50" th:selected="${pageSize == 50}">50</option>
+                    <option value="100" th:selected="${pageSize == 100}">100</option>
+                </select>
+            </div>
+
+            <nav th:if="${totalPages > 0}" class="flex items-center space-x-1">
+                <!-- First Page -->
+                <a th:href="@{/inventory/unload-orders(page=0, size=${pageSize})}" 
+                   th:classappend="${currentPage == 0} ? 'pointer-events-none opacity-30' : 'hover:bg-indigo-50 text-indigo-600'"
+                   class="px-3 py-2 rounded-md transition font-bold" title="First Page">&lt;&lt;</a>
+                
+                <!-- Previous Page -->
+                <a th:href="@{/inventory/unload-orders(page=${currentPage - 1}, size=${pageSize})}" 
+                   th:classappend="${currentPage == 0} ? 'pointer-events-none opacity-30' : 'hover:bg-indigo-50 text-indigo-600'"
+                   class="px-3 py-2 rounded-md transition font-bold" title="Previous">&lt;</a>
+
+                <!-- Page Numbers -->
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <!-- Show first page, last page, and pages around current -->
+                    <th:block th:if="${i == 0 or i == totalPages - 1 or (i >= currentPage - 2 and i <= currentPage + 2)}">
+                        <a th:href="@{/inventory/unload-orders(page=${i}, size=${pageSize})}"
+                           th:text="${i + 1}"
+                           th:classappend="${i == currentPage} ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'"
+                           class="px-4 py-2 rounded-md transition font-medium"></a>
+                    </th:block>
+                    
+                    <!-- Ellipses -->
+                    <th:block th:if="${(i == 1 and currentPage > 3) or (i == totalPages - 2 and currentPage < totalPages - 4)}">
+                        <span class="px-2 text-gray-400">...</span>
+                    </th:block>
+                </th:block>
+
+                <!-- Next Page -->
+                <a th:href="@{/inventory/unload-orders(page=${currentPage + 1}, size=${pageSize})}" 
+                   th:classappend="${currentPage == totalPages - 1} ? 'pointer-events-none opacity-30' : 'hover:bg-indigo-50 text-indigo-600'"
+                   class="px-3 py-2 rounded-md transition font-bold" title="Next">&gt;</a>
+
+                <!-- Last Page -->
+                <a th:href="@{/inventory/unload-orders(page=${totalPages - 1}, size=${pageSize})}" 
+                   th:classappend="${currentPage == totalPages - 1} ? 'pointer-events-none opacity-30' : 'hover:bg-indigo-50 text-indigo-600'"
+                   class="px-3 py-2 rounded-md transition font-bold" title="Last Page">&gt;&gt;</a>
+            </nav>
+        </div>
     </div>
+
+    <script th:inline="javascript">
+        function changeSize(size) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('size', size);
+            url.searchParams.set('page', 0); // Reset to first page when changing size
+            window.location.href = url.href;
+        }
+    </script>
 </body>
 </html>

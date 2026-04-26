@@ -36,7 +36,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-800 font-medium" th:text="${item.name}"></td>
                                 <td class="px-6 py-4 text-sm text-gray-600" th:text="${item.stockLevel + ' ' + item.unitType}"></td>
                                 <td class="px-6 py-4">
-                                    <input type="number" th:step="${item.unitType.name() == 'UNIT' ? '1' : 'any'}" th:name="'item_' + ${item.id}" class="w-32 p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500" placeholder="0">
+                                    <input type="number" min="0" th:step="${item.unitType.name() == 'UNIT' ? '1' : 'any'}" th:name="'item_' + ${item.id}" class="w-32 p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500" placeholder="0">
                                 </td>
                             </tr>
                         </tbody>

@@ -23,8 +23,14 @@ public class InventoryController {
     }
 
     @GetMapping("/unload-orders")
-    public String showUnloadOrders(Model model) {
-        model.addAttribute("orders", supplyOrderService.getAllSupplyOrders());
+    public String showUnloadOrders(@RequestParam(defaultValue = "0") int page, 
+                                   @RequestParam(defaultValue = "10") int size, 
+                                   Model model) {
+        org.springframework.data.domain.Page<com.diner.inventory.model.SupplyOrder> orderPage = supplyOrderService.getPaginatedSupplyOrders(page, size);
+        model.addAttribute("orders", orderPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", orderPage.getTotalPages());
+        model.addAttribute("pageSize", size);
         return "inventory/supply-orders/list";
     }
 
@@ -35,7 +41,10 @@ public class InventoryController {
     }
 
     @PostMapping("/supply-orders/validate/{id}")
-    public String validateSupplyOrder(@PathVariable Long id, @RequestParam Map<String, String> params, RedirectAttributes redirectAttributes) {
+    public String validateSupplyOrder(@PathVariable Long id, 
+                                      @RequestParam Map<String, String> params, 
+                                      @RequestParam String validatedBy,
+                                      RedirectAttributes redirectAttributes) {
         java.util.Map<Long, Double> receivedQuantities = new java.util.HashMap<>();
         java.util.Map<Long, Double> receivedPrices = new java.util.HashMap<>();
         
@@ -50,19 +59,12 @@ public class InventoryController {
         });
 
         try {
-            supplyOrderService.validateSupplyOrder(id, receivedQuantities, receivedPrices);
+            supplyOrderService.validateSupplyOrder(id, receivedQuantities, receivedPrices, validatedBy);
             redirectAttributes.addFlashAttribute("successMessage", "Supply order validated and stock updated.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/inventory/unload-orders";
-    }
-
-    @PostMapping("/snapshot")
-    public String saveSnapshot(RedirectAttributes redirectAttributes) {
-        inventoryService.createSnapshot();
-        redirectAttributes.addFlashAttribute("successMessage", "Inventory snapshot saved successfully!");
-        return "redirect:/inventory";
     }
 
     @PostMapping("/add-stock")
@@ -71,19 +73,6 @@ public class InventoryController {
         inventoryService.addStock(itemId, amount, pricePerUnit);
         redirectAttributes.addFlashAttribute("successMessage", "Stock updated successfully!");
         return "redirect:/inventory";
-    }
-    
-    @GetMapping("/reports")
-    public String reports(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
-            Model model) {
-
-        model.addAttribute("sales", 1000);
-        model.addAttribute("materials", 400);
-        model.addAttribute("waste", 100);
-
-        return "reports";
     }
 
 }

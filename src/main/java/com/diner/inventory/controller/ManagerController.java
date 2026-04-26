@@ -13,8 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.diner.inventory.repository.InventorySnapshotRepository;
-import com.diner.inventory.model.InventorySnapshot;
 import com.diner.inventory.model.InventoryItem;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,6 @@ public class ManagerController {
 
     private final ReportService reportService;
     private final InventoryItemRepository inventoryItemRepository;
-    private final InventorySnapshotRepository inventorySnapshotRepository;
     private final com.diner.inventory.service.EmployeeService employeeService;
     private final com.diner.inventory.service.SupplyOrderService supplyOrderService;
 
@@ -69,34 +66,6 @@ public class ManagerController {
             return "redirect:/manager/supply-orders/create";
         }
         return "redirect:/manager/dashboard";
-    }
-
-    @GetMapping("/audit")
-    public String showAuditForm(HttpSession session, Model model) {
-        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
-        model.addAttribute("snapshots", inventorySnapshotRepository.findAll());
-        return "manager/audit";
-    }
-
-    @PostMapping("/audit/results")
-    public String showAuditResults(@RequestParam(required = false) Long startId, @RequestParam(required = false) Long endId, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
-        
-        if (startId == null || endId == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Please select two valid snapshots.");
-            return "redirect:/manager/audit";
-        }
-
-        var startSnap = inventorySnapshotRepository.findById(startId);
-        var endSnap = inventorySnapshotRepository.findById(endId);
-
-        if (startSnap.isEmpty() || endSnap.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Selected snapshots could not be found.");
-            return "redirect:/manager/audit";
-        }
-        
-        model.addAttribute("report", reportService.generateVarianceReport(startId, endId, startSnap.get().getCreatedAt(), endSnap.get().getCreatedAt()));
-        return "manager/audit-results";
     }
 
     @GetMapping("/waste")
@@ -224,20 +193,28 @@ public class ManagerController {
     }
 
     @GetMapping("/reports")
-    public String showReports(@RequestParam(defaultValue = "daily") String range, HttpSession session, Model model) {
+    public String showReports(@RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+                               @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
+                               HttpSession session, Model model) {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
         
-        java.time.LocalDate end = java.time.LocalDate.now();
-        java.time.LocalDate start;
+        java.time.LocalDate now = java.time.LocalDate.now();
+        if (startDate == null) startDate = now;
+        if (endDate == null) endDate = now;
         
-        switch (range) {
-            case "weekly": start = end.minusWeeks(1); break;
-            case "monthly": start = end.minusMonths(1); break;
-            default: start = end; break;
+        if (startDate.isAfter(endDate)) {
+            java.time.LocalDate temp = startDate;
+            startDate = endDate;
+            endDate = temp;
         }
         
-        model.addAttribute("reports", reportService.getReportsByDateRange(start, end));
-        model.addAttribute("range", range);
+        model.addAttribute("reports", reportService.getReportsByDateRange(startDate, endDate));
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        // Add waste breakdown for the selected range
+        model.addAttribute("wasteBreakdown", reportService.getWasteBreakdown(startDate, endDate));
+
         return "manager/reports";
     }
 

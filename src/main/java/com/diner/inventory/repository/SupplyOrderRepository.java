@@ -8,4 +8,5 @@ import java.util.List;
 public interface SupplyOrderRepository extends JpaRepository<SupplyOrder, Long> {
     List<SupplyOrder> findByStatus(SupplyOrderStatus status);
     List<SupplyOrder> findAllByOrderByCreatedAtDesc();
+    org.springframework.data.domain.Page<SupplyOrder> findAllByOrderByCreatedAtDesc(org.springframework.data.domain.Pageable pageable);
 }

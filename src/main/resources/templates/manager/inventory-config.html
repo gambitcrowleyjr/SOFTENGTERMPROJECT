@@ -39,7 +39,7 @@
                                 <!-- Stock Threshold -->
                                 <div class="flex items-center space-x-2">
                                     <label class="text-sm text-gray-600 font-semibold">Min Stock:</label>
-                                    <input type="number" name="alertThreshold" step="0.1" th:value="${item.alertThreshold}"
+                                    <input type="number" name="alertThreshold" min="0" step="0.1" th:value="${item.alertThreshold}"
                                            th:data-unit-type="${item.unitType}"
                                            class="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 threshold-input"
                                            th:disabled="${!item.highValue}">
@@ -49,7 +49,7 @@
                                 <div class="flex items-center space-x-2 border-l pl-4">
                                     <label class="text-sm text-gray-600 font-semibold">Price Jump Alert:</label>
                                     <div class="relative">
-                                        <input type="number" name="priceThreshold" step="0.1" th:value="${item.priceAlertThreshold}"
+                                        <input type="number" name="priceThreshold" min="0" step="0.1" th:value="${item.priceAlertThreshold}"
                                                class="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                                placeholder="0">
                                         <span class="ml-1 text-gray-500">%</span>

@@ -24,6 +24,11 @@ public class SupplyOrderService {
         return supplyOrderRepository.findAllByOrderByCreatedAtDesc();
     }
 
+    public org.springframework.data.domain.Page<SupplyOrder> getPaginatedSupplyOrders(int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return supplyOrderRepository.findAllByOrderByCreatedAtDesc(pageable);
+    }
+
     public List<SupplyOrder> getPendingSupplyOrders() {
         return supplyOrderRepository.findByStatus(SupplyOrderStatus.PENDING);
     }
@@ -37,17 +42,22 @@ public class SupplyOrderService {
         SupplyOrder order = new SupplyOrder();
         
         for (Map.Entry<Long, Double> entry : itemsWithQuantities.entrySet()) {
-            if (entry.getValue() > 0) {
+            Double qty = entry.getValue();
+            if (qty != null && qty != 0) {
+                if (qty < 0) {
+                    throw new RuntimeException("Quantity cannot be negative.");
+                }
+                
                 var invItem = inventoryItemRepository.findById(entry.getKey())
                         .orElseThrow(() -> new RuntimeException("Item not found: " + entry.getKey()));
                 
-                if (invItem.getUnitType() == com.diner.inventory.model.UnitType.UNIT && entry.getValue() % 1 != 0) {
+                if (invItem.getUnitType() == com.diner.inventory.model.UnitType.UNIT && qty % 1 != 0) {
                     throw new RuntimeException("Quantity must be a whole number for unit-based items: " + invItem.getName());
                 }
 
                 SupplyOrderItem orderItem = new SupplyOrderItem();
                 orderItem.setInventoryItem(invItem);
-                orderItem.setQuantityOrdered(entry.getValue());
+                orderItem.setQuantityOrdered(qty);
                 orderItem.setPriceAtOrder(invItem.getCurrentPrice());
                 orderItem.setSupplyOrder(order);
                 order.getItems().add(orderItem);
@@ -62,7 +72,7 @@ public class SupplyOrderService {
     }
 
     @Transactional
-    public void validateSupplyOrder(Long orderId, Map<Long, Double> receivedQuantities, Map<Long, Double> receivedPrices) {
+    public void validateSupplyOrder(Long orderId, Map<Long, Double> receivedQuantities, Map<Long, Double> receivedPrices, String validatedBy) {
         SupplyOrder order = getSupplyOrderById(orderId);
         if (order.getStatus() != SupplyOrderStatus.PENDING) {
             throw new RuntimeException("Order is already processed.");
@@ -72,6 +82,13 @@ public class SupplyOrderService {
             Double received = receivedQuantities.getOrDefault(item.getId(), 0.0);
             Double price = receivedPrices.getOrDefault(item.getId(), item.getInventoryItem().getCurrentPrice());
             
+            if (received < 0) {
+                throw new RuntimeException("Received quantity cannot be negative for item: " + item.getInventoryItem().getName());
+            }
+            if (price < 0) {
+                throw new RuntimeException("Price cannot be negative for item: " + item.getInventoryItem().getName());
+            }
+
             if (item.getInventoryItem().getUnitType() == com.diner.inventory.model.UnitType.UNIT && received != null && received % 1 != 0) {
                 throw new RuntimeException("Received quantity must be a whole number for unit-based items: " + item.getInventoryItem().getName());
             }
@@ -86,6 +103,7 @@ public class SupplyOrderService {
 
         order.setStatus(SupplyOrderStatus.RECEIVED);
         order.setReceivedAt(LocalDateTime.now());
+        order.setValidatedBy(validatedBy);
         supplyOrderRepository.save(order);
     }
 }
