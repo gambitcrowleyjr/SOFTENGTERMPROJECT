@@ -23,7 +23,12 @@ public class OrderController {
 
     @GetMapping("/new")
     public String showNewOrderForm(Model model) {
-        model.addAttribute("menuItems", menuService.getAllMenuItems());
+        java.util.List<com.diner.inventory.model.MenuItem> allItems = menuService.getAllMenuItems();
+        java.util.Map<String, java.util.List<com.diner.inventory.model.MenuItem>> groupedItems = allItems.stream()
+                .collect(Collectors.groupingBy(item -> item.getCategory() != null ? item.getCategory() : "General"));
+        
+        model.addAttribute("groupedMenuItems", groupedItems);
+        model.addAttribute("categories", groupedItems.keySet());
         model.addAttribute("tables", employeeService.getAllTables());
         return "orders/new";
     }
