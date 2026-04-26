@@ -28,4 +28,10 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
+
+    public Double getTotalPrice() {
+        return items.stream()
+                .mapToDouble(item -> item.getPriceAtOrder() * item.getQuantity())
+                .sum();
+    }
 }

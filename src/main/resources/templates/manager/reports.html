@@ -53,6 +53,17 @@
                             th:text="'$' + ${#numbers.formatDecimal(report.netProfit, 1, 2)}">$0.00</td>
                     </tr>
                 </tbody>
+                <tfoot class="bg-gray-50 border-t-2 border-gray-200">
+                    <tr th:if="${not #lists.isEmpty(reports)}">
+                        <td class="px-6 py-4 font-black text-gray-800 uppercase tracking-widest text-xs">TOTALS</td>
+                        <td class="px-6 py-4 text-green-600 font-black" th:text="'$' + ${#numbers.formatDecimal(totalEarnings, 1, 2)}">$0.00</td>
+                        <td class="px-6 py-4 text-red-500 font-black" th:text="'$' + ${#numbers.formatDecimal(totalCosts, 1, 2)}">$0.00</td>
+                        <td class="px-6 py-4 text-orange-600 font-black" th:text="'$' + ${#numbers.formatDecimal(totalWaste, 1, 2)}">$0.00</td>
+                        <td class="px-6 py-4 font-black" 
+                            th:classappend="${totalNetProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}"
+                            th:text="'$' + ${#numbers.formatDecimal(totalNetProfit, 1, 2)}">$0.00</td>
+                    </tr>
+                </tfoot>
             </table>
             
             <div th:if="${#lists.isEmpty(reports)}" class="text-center py-20 bg-white">

@@ -208,9 +208,21 @@ public class ManagerController {
             endDate = temp;
         }
         
-        model.addAttribute("reports", reportService.getReportsByDateRange(startDate, endDate));
+        List<com.diner.inventory.model.DailyReport> reports = reportService.getReportsByDateRange(startDate, endDate);
+        model.addAttribute("reports", reports);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
+
+        // Calculate totals for each column
+        double totalEarnings = reports.stream().mapToDouble(r -> r.getTotalEarnings()).sum();
+        double totalCosts = reports.stream().mapToDouble(r -> r.getTotalCosts()).sum();
+        double totalWaste = reports.stream().mapToDouble(r -> r.getVarianceCost()).sum();
+        double totalNetProfit = reports.stream().mapToDouble(r -> r.getNetProfit()).sum();
+
+        model.addAttribute("totalEarnings", totalEarnings);
+        model.addAttribute("totalCosts", totalCosts);
+        model.addAttribute("totalWaste", totalWaste);
+        model.addAttribute("totalNetProfit", totalNetProfit);
 
         // Add waste breakdown for the selected range
         model.addAttribute("wasteBreakdown", reportService.getWasteBreakdown(startDate, endDate));
