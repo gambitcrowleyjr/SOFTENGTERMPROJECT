@@ -6,60 +6,89 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-6xl mx-auto">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold">📍 Section Management</h1>
             <a href="/manager/dashboard" class="text-indigo-600 hover:underline">Back to Dashboard</a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Add Section Form -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Create New Section Form -->
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col h-full border-t-4 border-blue-500">
                 <h2 class="text-xl font-bold mb-4">Create New Section</h2>
-                <form th:action="@{/manager/sections/add}" method="post">
-                    <div class="flex flex-col gap-4">
-                        <input type="text" name="name" placeholder="Section Name (e.g., Patio, Bar)" required class="border p-2 rounded">
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Create Section</button>
+                <form th:action="@{/manager/sections/add}" method="post" class="flex flex-col flex-grow">
+                    <div class="flex flex-col gap-4 flex-grow">
+                        <input type="text" name="name" placeholder="Section Name (e.g., Patio)" required class="border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
+                    <button type="submit" class="mt-4 bg-blue-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-600 transition">Create Section</button>
+                </form>
+            </div>
+
+            <!-- Create New Table Card -->
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col h-full border-t-4 border-green-500">
+                <h2 class="text-xl font-bold mb-4">Create New Table</h2>
+                <form th:action="@{/manager/tables/add}" method="post" class="flex flex-col flex-grow">
+                    <div class="flex flex-col gap-4 flex-grow">
+                        <input type="text" name="tableNumber" placeholder="Table Number (e.g., 20)" required class="border p-2 rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                    </div>
+                    <button type="submit" class="mt-4 bg-green-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-green-600 transition">Create Table</button>
                 </form>
             </div>
 
             <!-- Assign Table to Section -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col h-full border-t-4 border-indigo-500">
                 <h2 class="text-xl font-bold mb-4">Assign Table to Section</h2>
-                <form th:action="@{/manager/sections/assign-table}" method="post">
-                    <div class="flex flex-col gap-4">
-                        <input type="number" name="tableNumber" placeholder="Table Number (e.g., 15)" required class="border p-2 rounded">
-                        <select name="sectionId" required class="border p-2 rounded">
+                <form th:action="@{/manager/sections/assign-table}" method="post" class="flex flex-col flex-grow">
+                    <div class="flex flex-col gap-4 flex-grow">
+                        <select name="tableNumber" required class="border p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="" disabled selected>Pick unassigned table</option>
+                            <option th:each="table : ${unassignedTables}" th:value="${table.tableNumber}" th:text="'Table ' + ${table.tableNumber}"></option>
+                        </select>
+                        <select name="sectionId" required class="border p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                             <option value="" disabled selected>Select Section</option>
                             <option th:each="sec : ${sections}" th:value="${sec.id}" th:text="${sec.name}"></option>
                         </select>
-                        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition">Assign Table</button>
                     </div>
+                    <button type="submit" class="mt-4 bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-indigo-600 transition">Assign Table</button>
+                </form>
+            </div>
+
+            <!-- Unassign Table Card -->
+            <div class="bg-white p-6 rounded-xl shadow-md flex flex-col h-full border-t-4 border-red-500">
+                <h2 class="text-xl font-bold mb-4">Unassign Table</h2>
+                <form th:action="@{/manager/sections/unassign-table}" method="post" class="flex flex-col flex-grow">
+                    <div class="flex flex-col gap-4 flex-grow">
+                        <select name="tableNumber" required class="border p-2 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                            <option value="" disabled selected>Pick assigned table</option>
+                            <option th:each="table : ${assignedTables}" th:value="${table.tableNumber}" th:text="'Table ' + ${table.tableNumber} + ' (' + ${table.section.name} + ')'"></option>
+                        </select>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 italic">Table will become unassigned.</p>
+                    <button type="submit" class="mt-4 bg-red-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-red-600 transition">Unassign Table</button>
                 </form>
             </div>
         </div>
 
         <!-- Section Summary -->
-        <div class="mt-8 bg-white rounded-lg shadow-md overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 border-b">
+        <div class="mt-8 bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-100">
                     <tr>
-                        <th class="p-4 font-bold text-gray-700">Section Name</th>
-                        <th class="p-4 font-bold text-gray-700">Tables</th>
-                        <th class="p-4 font-bold text-gray-700">Assigned Employee</th>
+                        <th class="p-6 font-bold text-gray-700 uppercase tracking-wider text-xs">Section Name</th>
+                        <th class="p-6 font-bold text-gray-700 uppercase tracking-wider text-xs">Tables</th>
+                        <th class="p-6 font-bold text-gray-700 uppercase tracking-wider text-xs">Assigned Employee</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="sec : ${sections}" class="border-b hover:bg-gray-50 transition">
-                        <td class="p-4 font-medium" th:text="${sec.name}"></td>
-                        <td class="p-4">
+                <tbody class="divide-y divide-gray-50">
+                    <tr th:each="sec : ${sections}" class="hover:bg-gray-50 transition">
+                        <td class="p-6 font-bold text-gray-800" th:text="${sec.name}"></td>
+                        <td class="p-6">
                             <span th:each="table, iterStat : ${sec.tables}" 
                                   th:text="${table.tableNumber} + ${!iterStat.last ? ', ' : ''}"
-                                  class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-1 mb-1"></span>
+                                  class="inline-block bg-indigo-50 text-indigo-700 font-bold text-xs px-3 py-1 rounded-full mr-2 mb-2 border border-indigo-100"></span>
                             <span th:if="${#lists.isEmpty(sec.tables)}" class="text-gray-400 italic text-sm">No tables assigned</span>
                         </td>
-                        <td class="p-4" th:text="${sec.assignedEmployee != null ? sec.assignedEmployee.name : 'None'}"></td>
+                        <td class="p-6 text-gray-600" th:text="${sec.assignedEmployee != null ? sec.assignedEmployee.name : 'Unassigned'}"></td>
                     </tr>
                 </tbody>
             </table>

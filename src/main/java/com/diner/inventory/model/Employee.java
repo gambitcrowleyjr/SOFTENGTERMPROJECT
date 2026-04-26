@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -19,7 +22,6 @@ public class Employee {
 
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "section_id")
-    private Section assignedSection;
+    @OneToMany(mappedBy = "assignedEmployee")
+    private List<Section> assignedSections = new ArrayList<>();
 }

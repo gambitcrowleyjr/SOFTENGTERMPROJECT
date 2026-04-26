@@ -31,6 +31,18 @@ public class EmployeeService {
         return diningTableRepository.findAll();
     }
 
+    public List<DiningTable> getUnassignedTables() {
+        return diningTableRepository.findBySectionIsNull();
+    }
+
+    public List<DiningTable> getAssignedTables() {
+        return diningTableRepository.findBySectionIsNotNull();
+    }
+
+    public void saveTable(DiningTable table) {
+        diningTableRepository.save(table);
+    }
+
     public void saveEmployee(Employee employee) {
         employeeRepository.save(employee);
     }
@@ -49,16 +61,26 @@ public class EmployeeService {
     }
 
     @Transactional
+    public void unassignTableFromSection(String tableNumber) {
+        DiningTable table = diningTableRepository.findByTableNumber(tableNumber)
+                .orElseThrow(() -> new RuntimeException("Table not found"));
+        table.setSection(null);
+        diningTableRepository.save(table);
+    }
+
+    @Transactional
     public void assignSectionToEmployee(Long employeeId, Long sectionId) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow();
         Section section = sectionRepository.findById(sectionId).orElseThrow();
         
-        // Clear any previous employee assigned to this section (to respect @OneToOne)
-        if (section.getAssignedEmployee() != null) {
-            section.getAssignedEmployee().setAssignedSection(null);
-        }
-        
-        employee.setAssignedSection(section);
-        employeeRepository.save(employee);
+        section.setAssignedEmployee(employee);
+        sectionRepository.save(section);
+    }
+
+    @Transactional
+    public void unassignSectionFromEmployee(Long sectionId) {
+        Section section = sectionRepository.findById(sectionId).orElseThrow();
+        section.setAssignedEmployee(null);
+        sectionRepository.save(section);
     }
 }

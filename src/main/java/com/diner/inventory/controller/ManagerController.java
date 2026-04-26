@@ -165,7 +165,8 @@ public class ManagerController {
     public String listSections(HttpSession session, Model model) {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
         model.addAttribute("sections", employeeService.getAllSections());
-        model.addAttribute("tables", employeeService.getAllTables());
+        model.addAttribute("unassignedTables", employeeService.getUnassignedTables());
+        model.addAttribute("assignedTables", employeeService.getAssignedTables());
         return "manager/sections";
     }
 
@@ -178,6 +179,14 @@ public class ManagerController {
         return "redirect:/manager/sections";
     }
 
+    @PostMapping("/tables/add")
+    public String addTable(@RequestParam String tableNumber, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        com.diner.inventory.model.DiningTable table = new com.diner.inventory.model.DiningTable(tableNumber);
+        employeeService.saveTable(table);
+        return "redirect:/manager/sections";
+    }
+
     @PostMapping("/sections/assign-table")
     public String assignTable(@RequestParam String tableNumber, @RequestParam Long sectionId, HttpSession session) {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
@@ -185,10 +194,24 @@ public class ManagerController {
         return "redirect:/manager/sections";
     }
 
+    @PostMapping("/sections/unassign-table")
+    public String unassignTable(@RequestParam String tableNumber, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        employeeService.unassignTableFromSection(tableNumber);
+        return "redirect:/manager/sections";
+    }
+
     @PostMapping("/employees/assign-section")
     public String assignSection(@RequestParam Long employeeId, @RequestParam Long sectionId, HttpSession session) {
         if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
         employeeService.assignSectionToEmployee(employeeId, sectionId);
+        return "redirect:/manager/employees";
+    }
+
+    @PostMapping("/employees/unassign-section")
+    public String unassignSection(@RequestParam Long sectionId, HttpSession session) {
+        if (session.getAttribute("managerAuth") == null) return "redirect:/manager/login";
+        employeeService.unassignSectionFromEmployee(sectionId);
         return "redirect:/manager/employees";
     }
 

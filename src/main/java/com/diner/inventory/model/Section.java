@@ -21,6 +21,7 @@ public class Section {
     @OneToMany(mappedBy = "section")
     private List<DiningTable> tables = new ArrayList<>();
 
-    @OneToOne(mappedBy = "assignedSection")
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
     private Employee assignedEmployee;
 }
